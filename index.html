@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>PM Evolved</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: roadmap/Gantt metaphor — a 16-week timeline strip, then phase "workstreams" with expandable modules */
+:root{
+  --bg:#FBF8FF; --surface:#FFFFFF; --ink:#1D1733; --muted:#625C78; --line:#E6E0F2;
+  --accent:#6C3CE0; --accent-soft:#EDE5FF; --mark:#FF7A3D; --mark-soft:#FFE9DE; --good:#1FA971; --bad:#E2445C;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14111F; --surface:#1E1A2E; --ink:#F1EDFA; --muted:#A79FC0; --line:#342D4A;
+  --accent:#A98BFF; --accent-soft:#2C2350; --mark:#FF9A66; --mark-soft:#3D2418; --good:#43D196; --bad:#FF6B81; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14111F; --surface:#1E1A2E; --ink:#F1EDFA; --muted:#A79FC0; --line:#342D4A;
+  --accent:#A98BFF; --accent-soft:#2C2350; --mark:#FF9A66; --mark-soft:#3D2418; --good:#43D196; --bad:#FF6B81; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:40px 80px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.6rem;font-weight:700}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0}
+.eyebrow{font:500 .75rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.lede{max-width:62ch;color:var(--muted);font-size:1.05rem;margin-top:14px}
+header{display:grid;gap:8px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:18px;font:.85rem var(--mono);color:var(--muted)}
+.meta b{color:var(--ink);font-weight:500}
+/* progress */
+.progress{margin-top:28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bar{flex:1 1 260px;height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.progress span{font:500 .85rem var(--mono);font-variant-numeric:tabular-nums}
+button.reset{font:.8rem var(--mono);background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer}
+/* timeline */
+.timeline{margin-top:36px;overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.tl{min-width:720px;display:grid;grid-template-columns:repeat(16,1fr);padding:14px 14px 16px;gap:6px 4px}
+.tl .wk{font:.7rem var(--mono);color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.tl a{display:block;padding:6px 8px;border-radius:5px;font:500 .78rem var(--body);text-decoration:none;color:var(--ink);background:var(--accent-soft);border-left:3px solid var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl a:hover,.tl a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tl a.cap{background:var(--mark-soft);border-left-color:var(--mark)}
+/* nav tabs */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:48px}
+.tabs button{font:500 .85rem var(--body);padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* phases */
+.phase{margin-top:44px;display:grid;grid-template-columns:120px 1fr;gap:24px}
+.phase .rail{font:.8rem var(--mono);color:var(--muted)}
+.phase .rail strong{display:block;font:700 2.2rem var(--display);color:var(--accent);line-height:1}
+.phase-body{min-width:0;display:grid;gap:14px}
+.phase-body>p{color:var(--muted);max-width:65ch}
+details.mod{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.mod summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;gap:14px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+details.mod summary::-webkit-details-marker{display:none}
+details.mod summary:focus-visible{outline:2px solid var(--accent);border-radius:10px}
+.mod-title{display:flex;gap:10px;align-items:baseline;min-width:0}
+.mod-title code{font:500 .78rem var(--mono);color:var(--accent)}
+.chip{font:.72rem var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.chip.done{color:var(--accent);border-color:var(--accent)}
+.mod-inner{padding:0 18px 20px;display:grid;grid-template-columns:1.3fr 1fr;gap:24px}
+.mod-inner>div{min-width:0;display:grid;gap:14px;align-content:start}
+.lab{font:500 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+ul.topics{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+ul.topics label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+ul.topics input{margin-top:5px;accent-color:var(--accent);flex:none}
+ul.topics input:checked+span{color:var(--muted);text-decoration:line-through}
+.deep{background:var(--bg);border-radius:8px;padding:14px 16px;font-size:.92rem}
+.deep p+p{margin-top:8px}
+.task{border-left:3px solid var(--mark);padding:4px 0 4px 12px;font-size:.92rem}
+ul.vids li::marker{content:"▶  ";color:var(--mark);font-size:.7em}
+ul.res{padding-left:18px;margin:0;font-size:.9rem}
+ul.res li+li{margin-top:4px}
+a{color:var(--accent)}
+/* other sections */
+section.extra{margin-top:44px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:8px;align-content:start}
+.card a{font-weight:500}.card .tag{font:.7rem var(--mono);color:var(--mark);text-transform:uppercase;letter-spacing:.06em}
+.card p{color:var(--muted);font-size:.92rem}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.9rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 .72rem var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tablewrap{overflow-x:auto;margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+dl.gloss{display:grid;grid-template-columns:180px 1fr;gap:10px 20px;margin-top:18px}
+dl.gloss dt{font:500 .88rem var(--mono)}
+dl.gloss dd{margin:0;color:var(--muted);font-size:.92rem}
+footer{margin-top:60px;font-size:.82rem;color:var(--muted)}
+@media (max-width:720px){
+  .phase{grid-template-columns:1fr;gap:10px}
+  .mod-inner{grid-template-columns:1fr}
+  dl.gloss{grid-template-columns:1fr;gap:2px}
+  dl.gloss dd{margin-bottom:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* --- graphics & motion --- */
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center}
+.hero>div{min-width:0}
+.hero svg{width:100%;height:auto;max-width:460px;justify-self:end}
+.hero .node{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.hero .node.end{stroke:var(--accent);stroke-width:2}
+.hero text{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.hero text.big{font-family:var(--display);font-size:15px;font-weight:700;fill:var(--ink)}
+.hero .road{fill:none;stroke:var(--line);stroke-width:3;stroke-linecap:round}
+.hero .roadfill{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 2.4s .3s ease-out forwards}
+.hero .stop{fill:var(--accent);transform-box:fill-box;transform-origin:center;animation:pop .5s ease-out both}
+.hero .runner{fill:var(--mark)}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{0%{transform:scale(.2)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+.tl a{transform-origin:left;animation:grow .7s ease-out both}
+@keyframes grow{from{transform:scaleX(.15)}to{transform:scaleX(1)}}
+details.mod{transition:border-color .2s,box-shadow .2s,transform .2s}
+details.mod:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 6px 18px -12px var(--accent)}
+details.mod[open] .mod-inner{animation:fade .35s ease-out}
+@keyframes fade{from{opacity:.2;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.card{transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-2px);border-color:var(--accent)}
+ul.topics input:checked+span{animation:tick .3s}
+@keyframes tick{50%{color:var(--accent)}}
+.ring{width:64px;height:64px;margin-top:10px}
+.ring circle{fill:none;stroke-width:6}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .5s;transform:rotate(-90deg);transform-origin:center}
+.ring text{font:500 13px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.viz{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:center;margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+.viz svg{width:100%;max-width:420px;height:auto;justify-self:center}
+.viz .ax{stroke:var(--line);fill:none}
+.viz .lbl{font:11px var(--mono);fill:var(--muted)}
+.viz .before{fill:var(--mark);fill-opacity:.18;stroke:var(--mark);stroke-width:2}
+.viz .after{fill:var(--accent);fill-opacity:.22;stroke:var(--accent);stroke-width:2;transform-origin:210px 190px;animation:pop 1s ease-out both}
+.legend{display:grid;gap:10px;font-size:.92rem}
+.legend span{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.flow{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.flow div{flex:1 1 140px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;position:relative}
+.flow b{display:block;font-family:var(--display);font-size:1rem}
+.flow small{color:var(--muted)}
+.flow div:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--accent);font-weight:700}
+@media (max-width:720px){.hero{grid-template-columns:1fr}.hero svg{justify-self:start}.viz{grid-template-columns:1fr}.flow div::after{display:none}}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important}.hero .roadfill{stroke-dashoffset:0}}
+
+/* --- joyful layer --- */
+h1{font-weight:800;background:linear-gradient(90deg,#FF7A3D,#E0457B 35%,#6C3CE0 70%,#2E86DE);-webkit-background-clip:text;background-clip:text;color:transparent}
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blobs i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.28;animation:float 18s ease-in-out infinite alternate}
+.blobs i:nth-child(1){width:380px;height:380px;background:#FF7A3D;top:-80px;left:-60px}
+.blobs i:nth-child(2){width:320px;height:320px;background:#6C3CE0;top:30%;right:-80px;animation-delay:-6s}
+.blobs i:nth-child(3){width:300px;height:300px;background:#1FA971;bottom:-60px;left:30%;animation-delay:-12s}
+@keyframes float{to{transform:translate(60px,40px) scale(1.15)}}
+.tl a{background:color-mix(in srgb,var(--pc) 20%,var(--surface));border-left-color:var(--pc)}
+.phase .rail strong{color:var(--pc)}
+.ring .fg{stroke:var(--pc,var(--accent))}
+.mod-title code{background:var(--pc);color:#fff;padding:2px 7px;border-radius:6px}
+details.mod:hover{border-color:var(--pc);box-shadow:0 8px 22px -14px var(--pc)}
+.phase h2::after{content:"";display:block;width:56px;height:5px;border-radius:3px;background:var(--pc);margin-top:8px}
+.tabs button[aria-selected="true"]{background:linear-gradient(90deg,#6C3CE0,#E0457B);border-color:transparent;color:#fff}
+.vgrid{display:grid;gap:8px}
+a.vcard{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink);padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:.87rem;line-height:1.35;transition:transform .15s,border-color .15s}
+a.vcard:hover{transform:translateX(3px);border-color:var(--pc)}
+a.vcard .play{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--pc);color:#fff;font-size:12px;box-shadow:0 0 0 0 var(--pc)}
+a.vcard:hover .play{animation:pulse 1s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px transparent}}
+.quiz{background:var(--surface);border:2px dashed color-mix(in srgb,var(--pc) 55%,var(--line));border-radius:14px;padding:18px;display:grid;gap:16px}
+.quiz h3{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.quiz .score{font:500 .8rem var(--mono);color:var(--pc)}
+.q p{font-weight:500;margin-bottom:8px}
+.opts{display:grid;gap:6px}
+.opts button{text-align:left;font:inherit;font-size:.92rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s}
+.opts button:hover:not(:disabled){border-color:var(--pc)}
+.opts button.right{background:color-mix(in srgb,var(--good) 18%,var(--surface));border-color:var(--good)}
+.opts button.wrong{background:color-mix(in srgb,var(--bad) 15%,var(--surface));border-color:var(--bad);animation:shake .3s}
+.opts button:disabled{cursor:default}
+.why{font-size:.88rem;color:var(--muted);margin-top:6px}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50;width:100%;height:100%}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(120px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:500;transition:transform .35s,opacity .35s;opacity:0;z-index:60}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* playground */
+.play-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:18px;margin-top:18px}
+.lab-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:12px;align-content:start;border-top:6px solid var(--pc)}
+.lab-card p.d{color:var(--muted);font-size:.9rem}
+.row{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;font-size:.86rem}
+.row output{font:500 .85rem var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--pc)}
+.big-out{font:800 2rem var(--display);color:var(--pc);font-variant-numeric:tabular-nums}
+.chain{display:flex;flex-wrap:wrap;gap:6px}
+.chain span{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font:500 .75rem var(--mono);color:#fff;transition:background .3s}
+.dots{display:flex;flex-wrap:wrap;gap:6px;position:relative;padding-top:6px}
+.dots span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.65rem;color:#fff;transition:outline .2s,opacity .2s}
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stats div{flex:1 1 90px;background:var(--bg);border-radius:10px;padding:8px 10px;font-size:.78rem;color:var(--muted)}
+.stats b{display:block;font:700 1.2rem var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.uc{display:flex;flex-wrap:wrap;gap:6px}
+.uc button{font:inherit;font-size:.85rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.uc button.on{background:var(--pc);color:#fff;border-color:var(--pc)}
+.tier{padding:14px;border-radius:10px;font-size:.92rem;transition:background .3s}
+.tier b{font-family:var(--display);font-size:1.15rem;display:block}
+.bars{display:grid;gap:6px}
+.bars div{display:grid;grid-template-columns:70px 1fr 90px;gap:8px;align-items:center;font:.8rem var(--mono)}
+.bars i{display:block;height:16px;border-radius:4px;transition:width .4s}
+@media (max-width:520px){.row{grid-template-columns:1fr 60px}.row label{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){.blobs i{animation:none}}
+
+/* design studio */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px;margin-top:18px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:6px;align-content:start;border-top:5px solid var(--pc)}
+.step .n{font:800 1.4rem var(--display);color:var(--pc)}
+.step p{font-size:.86rem;color:var(--muted)}
+.step em{font-style:normal;font-size:.82rem;font-family:var(--mono);color:var(--ink)}
+.domains{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.domains button{font:500 .88rem var(--body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .15s}
+.domains button:hover{transform:translateY(-2px)}
+.domains button.on{background:var(--pc);border-color:var(--pc);color:#fff}
+.case{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:16px;animation:fade .35s ease-out}
+.case-head{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:baseline}
+.case-head h3{font-size:1.3rem}
+.tierpill{font:500 .75rem var(--mono);padding:3px 10px;border-radius:999px;color:#fff}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}
+.cbox{background:var(--bg);border-radius:10px;padding:12px 14px;font-size:.9rem;min-width:0}
+.cbox .lab{color:var(--pc)}
+.cbox ul{margin:0;padding-left:18px}
+.think{border-left:4px solid var(--pc);padding:10px 14px;background:color-mix(in srgb,var(--pc) 10%,var(--surface));border-radius:0 10px 10px 0;font-size:.92rem}
+.canvas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin-top:18px}
+.canvas label{display:grid;gap:6px;font-weight:500;font-size:.9rem;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.canvas small{font-weight:400;color:var(--muted)}
+.canvas textarea{font:inherit;font-size:.88rem;border:1px solid var(--line);border-radius:8px;padding:8px;min-height:70px;resize:vertical;background:var(--bg);color:var(--ink)}
+.canvas textarea:focus-visible{outline:2px solid var(--accent)}
+.meter{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+
+/* learn by doing */
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:14px;margin-top:18px;border-top:6px solid var(--pc)}
+.ex .d{color:var(--muted);font-size:.9rem}
+.ex-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.ex-head .score{font:500 .85rem var(--mono);color:var(--pc)}
+.sortcard{background:var(--bg);border-radius:12px;padding:16px;display:grid;gap:12px;text-align:center;min-height:130px;align-content:center}
+.sortcard .item{font:700 1.15rem var(--display);animation:slidein .4s ease-out}
+@keyframes slidein{from{opacity:0;transform:translateX(40px) rotate(3deg)}to{opacity:1;transform:none}}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bins button{font:600 .9rem var(--body);padding:12px 8px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .15s}
+.bins button:hover{transform:translateY(-3px);border-color:var(--pc)}
+.bins button.flash-good{background:color-mix(in srgb,var(--good) 25%,var(--surface));border-color:var(--good);animation:bounce .4s}
+.bins button.flash-bad{background:color-mix(in srgb,var(--bad) 20%,var(--surface));border-color:var(--bad);animation:shake .3s}
+@keyframes bounce{50%{transform:scale(1.08)}}
+.fb{font-size:.9rem;min-height:1.4em}
+.toks{display:flex;flex-wrap:wrap;gap:3px;font:.92rem var(--mono);line-height:1.9;padding:10px;background:var(--bg);border-radius:10px;min-height:60px}
+.toks span{padding:1px 3px;border-radius:4px;color:var(--ink);animation:pop .3s ease-out both}
+.ex textarea{font:inherit;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:10px;min-height:70px;background:var(--bg);color:var(--ink)}
+.toggles{display:flex;flex-wrap:wrap;gap:8px}
+.toggles label{display:flex;gap:6px;align-items:center;padding:7px 12px;border-radius:999px;border:1px solid var(--line);cursor:pointer;font-size:.88rem;background:var(--bg)}
+.toggles input{accent-color:var(--pc)}
+.toggles label:has(input:checked){border-color:var(--pc);background:color-mix(in srgb,var(--pc) 14%,var(--surface))}
+.promptbox,.outbox{font:.85rem/1.55 var(--mono);background:var(--bg);border-radius:10px;padding:12px;white-space:pre-wrap;min-width:0;overflow-wrap:anywhere}
+.outbox{border-left:4px solid var(--pc)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.qmeter{height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.qmeter i{display:block;height:100%;transition:width .5s,background .5s}
+.pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;position:relative}
+.pipe div{background:var(--bg);border-radius:12px;padding:12px 8px;text-align:center;font-size:.82rem;border:2px solid transparent;transition:border-color .3s,transform .3s,background .3s}
+.pipe div b{display:block;font-family:var(--display);font-size:.95rem}
+.pipe div.on{border-color:var(--pc);transform:translateY(-4px);background:color-mix(in srgb,var(--pc) 14%,var(--surface))}
+.chunks{display:grid;gap:6px}
+.chunks div{padding:8px 12px;border-radius:8px;background:var(--bg);font-size:.86rem;transition:all .4s;border-left:4px solid transparent}
+.chunks div.hit{border-left-color:var(--pc);background:color-mix(in srgb,var(--pc) 14%,var(--surface));transform:translateX(6px)}
+.chunks div.dim{opacity:.4}
+.sim{background:var(--bg);border-radius:12px;padding:16px;display:grid;gap:12px;animation:slidein .4s ease-out}
+.sim .opts button{background:var(--surface)}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap}
+.badge-row span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:600 .75rem var(--mono);background:var(--line);color:var(--muted);transition:background .3s}
+.badge-row span.g{background:var(--good);color:#fff}.badge-row span.b{background:var(--bad);color:#fff}.badge-row span.m{background:#F2A60C;color:#fff}
+@media (max-width:640px){.two{grid-template-columns:1fr}.pipe{grid-template-columns:1fr 1fr}.bins{grid-template-columns:1fr}}
+
+/* scenes */
+.scenes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;margin-top:18px}
+.scene{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;border-top:6px solid var(--pc)}
+.stage{position:relative;aspect-ratio:16/10;max-width:100%;background:linear-gradient(160deg,color-mix(in srgb,var(--pc) 18%,var(--surface)),var(--bg));overflow:hidden}
+.stage svg{width:100%;height:100%;display:block}
+.stage text{font-family:var(--body);fill:var(--ink)}
+.cap{padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cap p{font-size:.88rem;min-height:2.6em;flex:1 1 200px;color:var(--ink)}
+.playbtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--pc);color:#fff;font-size:15px;cursor:pointer;flex:none}
+.playbtn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.prog{height:4px;background:var(--line)}.prog i{display:block;height:100%;width:0;background:var(--pc)}
+/* studio */
+.studio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px;margin-top:18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:12px;align-content:start}
+.panel input[type=password],.panel select,.panel textarea{font:inherit;font-size:.9rem;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--bg);color:var(--ink)}
+.panel textarea{min-height:90px}
+.gen{font:600 1rem var(--body);padding:12px;border:0;border-radius:12px;color:#fff;background:linear-gradient(90deg,#FF7A3D,#E0457B,#6C3CE0);cursor:pointer}
+.gen:disabled{opacity:.6;cursor:wait}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:inherit;font-size:.8rem;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gallery figure{margin:0;background:var(--bg);border-radius:10px;overflow:hidden;animation:pop .4s ease-out}
+.gallery img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.gallery figcaption{font-size:.72rem;padding:6px 8px;color:var(--muted)}
+.hero-img{border-radius:12px;overflow:hidden;background:var(--bg);aspect-ratio:1;display:grid;place-items:center;color:var(--muted);font-size:.9rem;text-align:center;padding:0}
+.hero-img img{width:100%;height:100%;object-fit:cover}
+.spinner{width:46px;height:46px;border-radius:50%;border:5px solid var(--line);border-top-color:#E0457B;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.note{font-size:.82rem;color:var(--muted)}
+.err{color:var(--bad);font-size:.88rem}
+@media (max-width:760px){.studio{grid-template-columns:1fr}}
+
+/* --- v10: app shell, gamification, palette, flashcards --- */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;margin-top:36px;display:grid;gap:10px;padding-block:10px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.hudbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:8px 12px;box-shadow:0 10px 30px -22px #6C3CE0}
+.lvl{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 240px}
+.lvl svg{width:44px;height:44px;flex:none}
+.lvl .ring-bg{fill:none;stroke:var(--line);stroke-width:5}
+.lvl .ring-fg{fill:none;stroke:url(#lg);stroke-width:5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .6s}
+.lvl b{display:block;font-family:var(--display);font-size:1rem;line-height:1.2}
+.lvl small{font:500 .75rem var(--mono);color:var(--muted)}
+.xp{font:800 1.1rem var(--display);background:linear-gradient(90deg,#FF7A3D,#E0457B,#6C3CE0);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.badges{display:flex;gap:4px}
+.badges span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;background:var(--bg);filter:grayscale(1);opacity:.35;transition:all .4s}
+.badges span.got{filter:none;opacity:1;background:color-mix(in srgb,#F2A60C 22%,var(--surface));animation:pop .5s}
+.iconbtn{font:500 .82rem var(--body);display:flex;gap:6px;align-items:center;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.iconbtn kbd{font:.7rem var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--muted)}
+.iconbtn:focus-visible{outline:2px solid var(--accent)}
+.hud .tabs{margin-top:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.hud .tabs::-webkit-scrollbar{display:none}
+.hud .tabs button{white-space:nowrap;flex:none}
+.tabs .sep{flex:none;width:1px;background:var(--line);margin:4px 2px}
+/* mission */
+.mission{margin-top:28px;border-radius:20px;padding:22px;color:#fff;background:linear-gradient(120deg,#6C3CE0,#E0457B 60%,#FF7A3D);display:grid;grid-template-columns:1.4fr 1fr;gap:20px;position:relative;overflow:hidden}
+.mission::after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.12);right:-60px;top:-90px}
+.mission>div{min-width:0;position:relative;z-index:1;display:grid;gap:8px;align-content:start}
+.mission .eyebrow{color:rgba(255,255,255,.85)}
+.mission h2{font-size:1.5rem}
+.mission p{opacity:.92}
+.mlist{display:grid;gap:8px}
+.mlist a,.mlist button{display:flex;gap:10px;align-items:center;text-align:left;font:500 .9rem var(--body);color:#fff;text-decoration:none;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:10px 12px;cursor:pointer;transition:background .2s,transform .2s}
+.mlist a:hover,.mlist button:hover{background:rgba(255,255,255,.26);transform:translateX(3px)}
+.mlist i{font-style:normal;width:26px;height:26px;border-radius:8px;background:#fff;color:#6C3CE0;display:grid;place-items:center;flex:none;font-size:.8rem}
+/* palette */
+.pal{position:fixed;inset:0;z-index:80;background:rgba(20,17,31,.45);display:grid;place-items:start center;padding:12vh 16px 16px}
+.pal-box{width:min(620px,100%);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 80px -20px rgba(0,0,0,.45);overflow:hidden;animation:fade .2s}
+.pal-box input{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--line);padding:16px 18px;font:500 1.05rem var(--body);background:transparent;color:var(--ink);outline:none}
+.pal-res{max-height:52vh;overflow:auto;padding:6px}
+.pal-res button{display:flex;width:100%;gap:10px;align-items:center;text-align:left;font:inherit;font-size:.92rem;padding:10px 12px;border:0;border-radius:10px;background:none;color:var(--ink);cursor:pointer}
+.pal-res button.act,.pal-res button:hover{background:var(--accent-soft)}
+.pal-res small{margin-left:auto;font:.7rem var(--mono);color:var(--muted);flex:none}
+.pal-res .ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:.72rem;flex:none}
+/* flashcards */
+.flash-ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:16px}
+.fc{perspective:900px;height:150px;cursor:pointer;border:0;padding:0;background:none;font:inherit;color:inherit}
+.fc .in{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d}
+.fc.flip .in{transform:rotateY(180deg)}
+.fc .f,.fc .b{position:absolute;inset:0;border-radius:14px;display:grid;place-items:center;padding:14px;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.fc .f{background:var(--surface);border:2px solid var(--pc);font:700 1.05rem var(--display)}
+.fc .f small{display:block;font:500 .68rem var(--mono);color:var(--muted);margin-top:6px}
+.fc .b{background:var(--pc);color:#fff;font-size:.86rem;line-height:1.45;transform:rotateY(180deg)}
+.fc.known .f::after{content:"✓";position:absolute;top:8px;right:10px;color:var(--good);font-size:1rem}
+.fc:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:14px}
+@media (max-width:720px){.mission{grid-template-columns:1fr}.lvl{flex-basis:100%}.badges,.iconbtn kbd{display:none}.hudbar{gap:8px}}
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div><canvas id="confetti" aria-hidden="true"></canvas><div class="toast" id="toast" role="status"></div>
+<div class="pal" id="pal" hidden><div class="pal-box" role="dialog" aria-label="Search"><input id="palin" placeholder="Search modules, videos, terms, exercises…" aria-label="Search" autocomplete="off"><div class="pal-res" id="palres"></div></div></div>
+<div class="wrap">
+<header class="hero"><div style="display:grid;gap:8px">
+  <span class="eyebrow">PM Evolved · 16 weeks · ~8 h/week</span>
+  <h1>Your PM skills, evolved for AI</h1>
+  <p class="lede">A gentle, step-by-step path for project managers, product owners and product managers who want to bring AI into their work. You keep the skills you already have (scope, risk, stakeholders) and add the technical fluency, data judgement and governance knowledge that AI work demands.</p>
+  <div class="meta"><span><b>7</b> phases</span><span><b>22</b> modules</span><span><b>1</b> capstone</span><span><b>70+</b> free videos</span><span><b>13</b> essential free resources</span><span>No coding required · light Python optional</span></div>
+  <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div><span id="ptext">0 of 0 topics done</span><button class="reset" id="reset" type="button">Reset progress</button></div>
+</div>
+<svg viewBox="0 0 460 300" role="img" aria-label="Path from PM today through 7 phases to PM evolved">
+  <path class="road" d="M40 250 C 140 250, 120 160, 220 160 S 320 60, 420 60"/>
+  <path class="roadfill" id="road" d="M40 250 C 140 250, 120 160, 220 160 S 320 60, 420 60"/>
+  <g id="stops"></g>
+  <circle class="runner" r="7"><animateMotion dur="6s" repeatCount="indefinite" path="M40 250 C 140 250, 120 160, 220 160 S 320 60, 420 60"/></circle>
+  <rect class="node" x="10" y="262" width="120" height="30" rx="8"/><text class="big" x="70" y="282" text-anchor="middle">PM today</text>
+  <rect class="node end" x="340" y="14" width="112" height="30" rx="8"/><text class="big" x="396" y="34" text-anchor="middle">PM evolved</text>
+</svg>
+</header>
+
+<div class="timeline" aria-label="16-week roadmap"><div class="tl" id="tl"></div></div>
+
+<div class="hud" id="hud"><div class="hudbar">
+ <div class="lvl"><svg viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#FF7A3D"/><stop offset="1" stop-color="#6C3CE0"/></linearGradient></defs><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="lvring" cx="22" cy="22" r="18" stroke-dasharray="113.1" stroke-dashoffset="113.1"/><text x="22" y="22" text-anchor="middle" dominant-baseline="central" style="font:700 13px var(--display);fill:var(--ink)" id="lvnum">1</text></svg>
+  <div style="min-width:0"><b id="lvname">AI Curious</b><small id="lvnext">0 / 100 XP to next level</small></div><span class="xp" id="xp">0 XP</span></div>
+ <div class="badges" id="badges"></div>
+ <button class="iconbtn" type="button" id="searchbtn" aria-label="Search everything">⌕ Search <kbd>Ctrl K</kbd></button>
+ <button class="iconbtn" type="button" id="themebtn" aria-label="Toggle dark mode">☾ Theme</button>
+</div>
+<div class="tabs" role="tablist" id="tabs">
+  <button role="tab" aria-selected="true" data-v="curriculum" id="tab-cur">Curriculum</button>
+  <span class="sep"></span>
+  <button role="tab" aria-selected="false" data-v="doing" id="tab-do">Learn by doing</button>
+  <button role="tab" aria-selected="false" data-v="imgstudio" id="tab-img">AI image studio</button>
+  <button role="tab" aria-selected="false" data-v="studio" id="tab-st">Feature design studio</button>
+  <button role="tab" aria-selected="false" data-v="playground" id="tab-pg">Playground</button>
+  <span class="sep"></span>
+  <button role="tab" aria-selected="false" data-v="skills" id="tab-sk">Role &amp; skills map</button>
+  <button role="tab" aria-selected="false" data-v="library" id="tab-lib">Free library</button>
+  <button role="tab" aria-selected="false" data-v="glossary" id="tab-gl">Glossary</button>
+  <button role="tab" aria-selected="false" data-v="career" id="tab-ca">Career &amp; certification</button>
+</div>
+</div>
+
+<main>
+<div id="v-curriculum"></div>
+
+<div id="v-doing" hidden>
+<section class="extra"><span class="eyebrow">Animated explainers</span><h2>Watch the idea, then try it</h2><p class="lede">Three short animated scenes. Press play; each runs about 20 seconds.</p>
+<div class="scenes">
+ <div class="scene" style="--pc:#6C3CE0"><div class="stage"><svg viewBox="0 0 320 200" id="scA"></svg></div><div class="prog"><i id="pgA"></i></div><div class="cap"><p id="cpA">How an LLM writes, one token at a time.</p><button class="playbtn" data-sc="A" aria-label="Play scene">▶</button></div></div>
+ <div class="scene" style="--pc:#FF7A3D"><div class="stage"><svg viewBox="0 0 320 200" id="scB"></svg></div><div class="prog"><i id="pgB"></i></div><div class="cap"><p id="cpB">The life of an AI project, from idea to operations.</p><button class="playbtn" data-sc="B" aria-label="Play scene">▶</button></div></div>
+ <div class="scene" style="--pc:#1FA971"><div class="stage"><svg viewBox="0 0 320 200" id="scC"></svg></div><div class="prog"><i id="pgC"></i></div><div class="cap"><p id="cpC">Model drift: why launch is not the finish line.</p><button class="playbtn" data-sc="C" aria-label="Play scene">▶</button></div></div>
+</div></section>
+<section class="extra"><span class="eyebrow">Hands-on exercises</span><h2>Learn by doing</h2><p class="lede">Five short exercises, about 5 minutes each. They train the instincts an AI PM uses in every meeting.</p>
+
+<div class="ex" style="--pc:#FF7A3D"><div class="ex-head"><h3>1 · Rules, classic ML, or LLM?</h3><span class="score" id="s1score"></span></div>
+<p class="d">Phase 1. For each problem, pick the simplest approach that works.</p>
+<div class="sortcard"><div class="item" id="s1item"></div><div class="bins" id="s1bins"><button type="button" data-b="0">Rules</button><button type="button" data-b="1">Classic ML</button><button type="button" data-b="2">LLM</button></div></div>
+<p class="fb" id="s1fb"></p></div>
+
+<div class="ex" style="--pc:#2E86DE"><div class="ex-head"><h3>2 · See what a token is</h3><span class="score" id="tkscore"></span></div>
+<p class="d">Phase 1.2. Type anything. Each coloured block is roughly one token (an approximation of how models split text). German and code often use more tokens than English.</p>
+<textarea id="tkin" aria-label="Text to tokenize">The project manager reviewed the AI evaluation results before the steering committee.</textarea>
+<div class="toks" id="tkout"></div></div>
+
+<div class="ex" style="--pc:#1FA971"><div class="ex-head"><h3>3 · Build a better prompt</h3><span class="score" id="pbscore"></span></div>
+<p class="d">Phase 2.1. Task: turn messy meeting notes into a risk log. Switch on prompt parts and watch the output improve.</p>
+<div class="toggles" id="pbt"></div><div class="qmeter"><i id="pbm"></i></div>
+<div class="two"><div><div class="lab">Your prompt</div><div class="promptbox" id="pbp"></div></div><div><div class="lab">Model output</div><div class="outbox" id="pbo"></div></div></div></div>
+
+<div class="ex" style="--pc:#8E5CE0"><div class="ex-head"><h3>4 · Watch RAG work</h3></div>
+<p class="d">Phase 2.2. Pick a question and see each step of retrieval-augmented generation, step by step.</p>
+<div class="toggles" id="ragq"></div>
+<div class="pipe" id="pipe"><div><b>Question</b>user asks</div><div><b>Embed</b>to numbers</div><div><b>Retrieve</b>top passages</div><div><b>Generate</b>LLM answers</div><div><b>Cite</b>show sources</div></div>
+<div class="chunks" id="chunks"></div><div class="outbox" id="ragout">Pick a question above.</div></div>
+
+<div class="ex" style="--pc:#E0457B"><div class="ex-head"><h3>5 · AI PM simulator</h3><span class="score" id="simscore"></span></div>
+<p class="d">Phases 4–7. Real situations from AI projects. Choose what you would do. Best answers score 2, acceptable 1.</p>
+<div class="badge-row" id="simbadges"></div><div id="sim"></div></div>
+</section></div>
+<div id="v-imgstudio" hidden>
+<section class="extra"><span class="eyebrow">Hugging Face · free tier</span><h2>AI image studio</h2>
+<p class="lede">Generate illustrations for your notes, slides and capstone with free open models on Hugging Face. You also learn the basics of calling an AI API: a model, a token, a request and a response.</p>
+<div class="studio">
+ <div class="panel">
+  <label for="hftok"><b>1 · Your Hugging Face token</b></label>
+  <input type="password" id="hftok" placeholder="hf_..." autocomplete="off">
+  <p class="note">Create a free account at huggingface.co, then Settings → Access Tokens → New token (type "Read" or "Fine-grained" with Inference permission). The token is kept only in this browser tab and sent only to Hugging Face. <label><input type="checkbox" id="hfremember"> Remember on this device</label></p>
+  <label for="hfmodel"><b>2 · Model</b></label>
+  <select id="hfmodel"><option value="black-forest-labs/FLUX.1-schnell">FLUX.1 schnell (fast, high quality)</option><option value="stabilityai/stable-diffusion-xl-base-1.0">Stable Diffusion XL</option><option value="stabilityai/stable-diffusion-3.5-large">Stable Diffusion 3.5 Large</option></select>
+  <label for="hfprompt"><b>3 · Prompt</b></label>
+  <div class="presets" id="hfpre"></div>
+  <textarea id="hfprompt">Colorful flat illustration of a project manager guiding a friendly robot along a road map with milestones, bright joyful colors, clean vector style</textarea>
+  <button class="gen" id="hfgo" type="button">Generate image</button>
+  <p class="err" id="hferr" role="alert"></p>
+  <p class="note">Free accounts get a small monthly credit. If you see "out of credits" or "model loading", wait a minute or try another model.</p>
+ </div>
+ <div class="panel"><div class="hero-img" id="hfout">Your image will appear here.</div><b>Gallery (this session)</b><div class="gallery" id="hfgal"></div><p class="note">Right-click (or long-press) an image to save it.</p></div>
+</div>
+<div class="tablewrap" style="padding:16px"><b>What just happened? (the API in one picture)</b><p class="note" style="margin-top:8px;font-family:var(--mono);white-space:pre-wrap">POST https://router.huggingface.co/hf-inference/models/&lt;model&gt;
+Authorization: Bearer &lt;your token&gt;
+Body: {"inputs": "&lt;your prompt&gt;"}
+→ Response: image bytes (PNG/JPEG). Cost per image is charged against your free credits.</p></div>
+</section></div>
+<div id="v-studio" hidden>
+<section class="extra"><span class="eyebrow">How an AI PM thinks</span><h2>Designing a new AI feature, step by step</h2>
+<p class="lede">Strong AI PMs ask the same eight questions in the same order, whatever the industry. Learn the sequence here, see it applied in ten domains, then use the canvas to design your own feature.</p>
+<div class="steps" id="steps"></div></section>
+<section class="extra"><span class="eyebrow">Worked examples</span><h2>The same thinking across ten domains</h2>
+<p class="lede">Pick a domain. Each case walks through the eight steps and ends with the one lesson that domain teaches best.</p>
+<div class="domains" id="domains"></div><div id="case"></div></section>
+<section class="extra"><span class="eyebrow">Your turn</span><h2>AI feature design canvas</h2>
+<p class="lede">Fill in one box per step for a feature at your own company. Your answers stay in this browser. A complete canvas is a ready outline for an AI PRD (module 4.4).</p>
+<div class="canvas" id="canvas"></div>
+<div class="meter"><div class="bar" style="max-width:320px"><i id="cbar"></i></div><span id="ctext" style="font:500 .85rem var(--mono)"></span><button class="reset" type="button" id="cload">Load banking example</button><button class="reset" type="button" id="cclear">Clear canvas</button></div>
+</section></div>
+<div id="v-playground" hidden>
+<section class="extra"><span class="eyebrow">Learn by doing</span><h2>Interactive playground</h2><p class="lede">Four hands-on models of the ideas you will use every week. Move the sliders and watch the numbers change.</p>
+<div class="play-grid">
+ <div class="lab-card" style="--pc:#2E86DE"><h3>LLM cost calculator</h3><p class="d">Phase 1.3. Estimate monthly run cost for a feature before anyone promises a business case.</p>
+  <div class="row"><label for="cv">Requests per month</label><input type="range" id="cv" min="1000" max="500000" step="1000" value="50000"><output id="cvo"></output></div>
+  <div class="row"><label for="ci">Input tokens / request</label><input type="range" id="ci" min="100" max="20000" step="100" value="2000"><output id="cio"></output></div>
+  <div class="row"><label for="co">Output tokens / request</label><input type="range" id="co" min="50" max="4000" step="50" value="400"><output id="coo"></output></div>
+  <div class="bars" id="cbars"></div><p class="d">Prices are illustrative per million tokens (small $0.25/$1.25, mid $3/$15, large $15/$75). Check current provider pricing.</p></div>
+ <div class="lab-card" style="--pc:#E0457B"><h3>Agent reliability chain</h3><p class="d">Phase 2.3. Errors compound when an agent chains steps.</p>
+  <div class="row"><label for="ar">Reliability per step</label><input type="range" id="ar" min="80" max="99.9" step="0.1" value="95"><output id="aro"></output></div>
+  <div class="row"><label for="as">Number of steps</label><input type="range" id="as" min="1" max="20" value="10"><output id="aso"></output></div>
+  <div class="chain" id="achain"></div><div><span class="d" style="color:var(--muted)">End-to-end success</span><div class="big-out" id="aout"></div></div><button class="reset" id="arun" type="button">Simulate one run</button></div>
+ <div class="lab-card" style="--pc:#29A86B"><h3>Precision vs recall</h3><p class="d">Phase 4.3. 24 emails scored by a spam model. Green = real spam, grey = legitimate. Move the threshold.</p>
+  <div class="row"><label for="pt">Flag as spam if score ≥</label><input type="range" id="pt" min="0.05" max="0.95" step="0.05" value="0.5"><output id="pto"></output></div>
+  <div class="dots" id="pdots"></div><div class="stats" id="pstats"></div></div>
+ <div class="lab-card" style="--pc:#8E5CE0"><h3>EU AI Act risk tier</h3><p class="d">Phase 6.1. Pick a use case to see its likely tier. Simplified for learning, not legal advice.</p>
+  <div class="uc" id="uc"></div><div class="tier" id="tier"></div></div>
+</div></section></div>
+<div id="v-skills" hidden>
+  <section class="extra">
+    <span class="eyebrow">Your growth</span>
+    <h2>Skill profile before and after the track</h2>
+    <div class="viz"><svg viewBox="-70 10 560 360" id="radar" role="img" aria-label="Radar chart of six competencies"></svg>
+    <div class="legend"><div><span style="background:var(--mark)"></span>Typical experienced PM today</div><div><span style="background:var(--accent)"></span>After completing the track</div><p style="color:var(--muted);font-size:.88rem">Scale 1–5 per competency. Your project, stakeholder and risk skills carry over; the biggest gains are AI literacy, evaluation and governance.</p></div></div>
+  </section>
+  <section class="extra">
+    <span class="eyebrow">AI project lifecycle</span>
+    <h2>How an AI initiative moves</h2>
+    <div class="flow"><div><b>Discover</b><small>Problem, value, data check</small></div><div><b>Experiment</b><small>Time-boxed PoC with evals</small></div><div><b>Pilot</b><small>Real users, guardrails</small></div><div><b>Launch</b><small>Staged rollout, monitoring</small></div><div><b>Operate</b><small>Drift, cost, re-evaluate</small></div></div>
+  </section>
+  <section class="extra">
+    <span class="eyebrow">What changes</span>
+    <h2>Classic PM vs AI PM</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Area</th><th>Classic project management</th><th>AI project / product management</th></tr></thead>
+      <tbody>
+      <tr><td>Scope</td><td>Requirements are known up front and mostly stable.</td><td>Feasibility is unknown until you test with real data. Scope is a hypothesis.</td></tr>
+      <tr><td>Planning</td><td>Work breakdown, critical path, fixed milestones.</td><td>Time-boxed experiments with go / pivot / stop gates.</td></tr>
+      <tr><td>Quality</td><td>Pass/fail acceptance tests.</td><td>Statistical quality: precision, recall, eval scores, error budgets. Never 100%.</td></tr>
+      <tr><td>Done</td><td>Shipped = done.</td><td>Shipped = start of monitoring. Models drift and degrade.</td></tr>
+      <tr><td>Key dependency</td><td>People and code.</td><td>Data: availability, quality, rights, labeling.</td></tr>
+      <tr><td>Risk</td><td>Schedule, budget, scope.</td><td>Plus bias, hallucination, privacy, security (prompt injection), regulation.</td></tr>
+      <tr><td>Cost</td><td>Mostly fixed build cost.</td><td>Variable run cost per request (tokens, GPU), which grows with usage.</td></tr>
+      </tbody></table></div>
+  </section>
+  <section class="extra">
+    <span class="eyebrow">Competencies</span>
+    <h2>The six competencies you will build</h2>
+    <div class="grid2">
+      <div class="card"><h3>AI literacy</h3><p>Explain how ML and LLMs work, what they can't do, and why they fail, to engineers and executives alike.</p></div>
+      <div class="card"><h3>Data judgement</h3><p>Assess whether data is sufficient, representative, legally usable and labeled well enough to start.</p></div>
+      <div class="card"><h3>Experiment-led delivery</h3><p>Run AI work as staged experiments with clear exit criteria instead of a fixed waterfall plan.</p></div>
+      <div class="card"><h3>Evaluation &amp; metrics</h3><p>Define offline evals, online business metrics, and guardrails, and link them to each other.</p></div>
+      <div class="card"><h3>Governance &amp; risk</h3><p>Classify use cases under the EU AI Act, run impact assessments, set human oversight.</p></div>
+      <div class="card"><h3>Strategy &amp; economics</h3><p>Decide build vs buy, model unit economics, and build the business case and team.</p></div>
+    </div>
+  </section>
+</div>
+
+<div id="v-library" hidden></div>
+<div id="v-glossary" hidden>
+  <section class="extra">
+    <span class="eyebrow">Reference</span>
+    <h2>Flashcards: terms you will hear every week</h2>
+    <div class="flash-ctl"><span class="note" id="fcstat"></span><button class="reset" type="button" id="fcshuffle">Shuffle</button><button class="reset" type="button" id="fcflip">Flip all</button></div><p class="note">Tap a card to flip it. Double-tap (or press K) to mark it as known.</p><div class="cards" id="gloss"></div>
+  </section>
+</div>
+
+<div id="v-career" hidden>
+  <section class="extra">
+    <span class="eyebrow">Target roles</span>
+    <h2>Where this track leads</h2>
+    <div class="grid2">
+      <div class="card"><h3>AI Project / Program Manager</h3><p>Delivers AI initiatives across data, ML and business teams. Strongest fit for an experienced PM.</p></div>
+      <div class="card"><h3>AI Product Manager</h3><p>Owns the problem, the metrics and the roadmap of an AI-powered product.</p></div>
+      <div class="card"><h3>AI Delivery Lead / Head of AI PMO</h3><p>Runs a portfolio of AI use cases, prioritisation, and governance gates.</p></div>
+      <div class="card"><h3>AI Governance Manager</h3><p>Owns AI risk, compliance (EU AI Act, ISO/IEC 42001) and responsible-AI processes.</p></div>
+    </div>
+  </section>
+  <section class="extra">
+    <span class="eyebrow">Credentials</span>
+    <h2>Certifications worth considering</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Certification</th><th>Focus</th><th>When to take it</th></tr></thead>
+      <tbody>
+      <tr><td>PMI-CPMAI (Cognitive Project Management for AI)</td><td>Methodology for running AI and data projects</td><td>After Phase 4</td></tr>
+      <tr><td>Cloud AI fundamentals (AWS AI Practitioner, Azure AI-900, Google Cloud Gen AI Leader)</td><td>Vendor services, vocabulary</td><td>After Phase 2</td></tr>
+      <tr><td>IAPP AIGP (AI Governance Professional)</td><td>AI governance, risk and law</td><td>After Phase 6</td></tr>
+      <tr><td>ISO/IEC 42001 Lead Implementer</td><td>AI management systems</td><td>If you move toward governance</td></tr>
+      </tbody></table></div>
+    <p class="lede" style="font-size:.9rem">Check each provider's site for current exam names and prices before booking; they change often.</p>
+  </section>
+  <section class="extra">
+    <span class="eyebrow">Portfolio</span>
+    <h2>What to show employers</h2>
+    <div class="grid2">
+      <div class="card"><h3>AI PRD</h3><p>A product requirements doc for an LLM feature, with eval plan and guardrails (Phase 4).</p></div>
+      <div class="card"><h3>Use-case portfolio</h3><p>Ten scored AI use cases with value / feasibility / risk matrix (Phase 7).</p></div>
+      <div class="card"><h3>Risk assessment</h3><p>EU AI Act classification and impact assessment for one use case (Phase 6).</p></div>
+      <div class="card"><h3>Working prototype</h3><p>A no-code or low-code RAG assistant with an eval sheet of 50 test questions (Capstone).</p></div>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer>Pace yourself: one module per 3–4 days. Progress is saved in this browser only.</footer>
+</div>
+
+<script>
+const PCOL=["#FF7A3D","#F2A60C","#1FA971","#2E86DE","#8E5CE0","#E0457B","#13A3A3"];
+const PHASES=[
+{n:1,name:"AI Foundations",weeks:[1,2],intro:"Build an accurate mental model of what AI is, how models learn, and why they fail. Everything later depends on this.",mods:[
+ {id:"1.1",t:"How machine learning actually works",topics:["AI vs ML vs deep learning vs generative AI","Supervised, unsupervised and reinforcement learning","Training, validation and test data; why we split","Overfitting and underfitting in plain terms","Classification vs regression vs generation"],
+  deep:["A model is a function learned from examples instead of written as rules. The PM consequence: quality depends on the examples, so data is part of your scope, not an input someone else provides.","Overfitting means the model memorised training data and fails on new cases. When a team reports 98% accuracy, your first question is: on which data, and was it ever seen during training?"],
+  task:"Pick three features at your current company. For each, decide whether rules, classic ML or an LLM fits best, and write one sentence of justification.",
+  res:[["AI For Everyone (Andrew Ng, Coursera)","https://www.coursera.org/learn/ai-for-everyone"],["Google ML Crash Course: Intro","https://developers.google.com/machine-learning/crash-course"]]},
+ {id:"1.2",t:"Large language models from the inside",topics:["Tokens, context windows and next-token prediction","Pre-training, instruction tuning, RLHF","Embeddings and semantic similarity","Temperature and why outputs vary","Hallucinations: causes and mitigations"],
+  deep:["An LLM predicts the next token from patterns in vast text. It has no built-in fact database, so it can sound confident and be wrong. Grounding (giving it source documents) and evaluation reduce, but never remove, this risk.","Context window size limits how much it can 'see' at once. Price and latency scale with tokens in and out, which makes token count a planning and budget variable."],
+  task:"Use any chat assistant to answer 10 questions about your own domain. Record which answers were wrong and classify why (missing knowledge, outdated, reasoning error, invented source).",
+  res:[["3Blue1Brown: Neural networks / transformers series","https://www.youtube.com/@3blue1brown"],["Andrej Karpathy: Intro to Large Language Models","https://www.youtube.com/@AndrejKarpathy"]]},
+ {id:"1.3",t:"Capabilities, limits and economics",topics:["What AI is good at today vs hype","Latency, cost per request, throughput","Open-weight vs proprietary models","Model size vs task fit"],
+  deep:["A rough unit-economics formula you will use repeatedly: cost per task = (input tokens × input price + output tokens × output price) × calls per task. Multiply by monthly volume before anyone promises a business case.","Smaller, cheaper models often match large ones on narrow tasks. Picking the model is a trade-off decision you should drive with data from evals."],
+  task:"Build a one-page cost model in a spreadsheet for a support-ticket summariser handling 50,000 tickets per month at two different model price points.",
+  res:[["Provider pricing pages (OpenAI, Anthropic, Google)","https://www.anthropic.com/pricing"]]}
+]},
+{n:2,name:"Generative AI Systems",weeks:[3,5],intro:"Understand the building blocks your engineers will propose, so you can judge trade-offs and ask the right questions.",mods:[
+ {id:"2.1",t:"Prompt engineering for managers",topics:["System prompts, roles and instructions","Few-shot examples","Structured output (JSON)","Chain-of-thought and step-by-step reasoning","Prompt versioning as a managed artifact"],
+  deep:["Prompts are product specifications in natural language. Treat them like code: version them, review changes, and re-run evals on every change.","Most early quality wins come from clearer instructions and good examples, before anyone touches fine-tuning."],
+  task:"Write a prompt that turns meeting notes into a RAID log (Risks, Assumptions, Issues, Dependencies). Iterate five times and keep a changelog of what improved.",
+  res:[["Anthropic prompt engineering guide","https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview"],["DeepLearning.AI short courses","https://www.deeplearning.ai/short-courses/"]]},
+ {id:"2.2",t:"Retrieval-augmented generation (RAG)",topics:["Why RAG: grounding answers in your documents","Chunking, embeddings and vector databases","Retrieval quality vs generation quality","Citations and source attribution","Access control on retrieved content"],
+  deep:["RAG fetches relevant passages from your documents and passes them to the model with the question. When answers are wrong, first check whether the right passage was retrieved. Retrieval failures and generation failures need different fixes and different owners.","Permissions are a common blind spot: the assistant must not retrieve documents the user is not allowed to see."],
+  task:"Sketch the architecture of an internal policy assistant. Mark the data sources, the owner of each, refresh frequency, and who may see what.",
+  res:[["Chip Huyen, AI Engineering (O'Reilly, 2025)","https://www.oreilly.com/library/view/ai-engineering/9781098166298/"]]},
+ {id:"2.3",t:"Fine-tuning, agents and tool use",topics:["Prompting vs RAG vs fine-tuning decision tree","Function calling and tool use","AI agents and multi-step workflows","Human-in-the-loop checkpoints","Failure modes of autonomous agents"],
+  deep:["Rule of thumb: prompting changes behaviour, RAG adds knowledge, fine-tuning changes style or narrow skill. Fine-tuning is rarely the first step.","Agents chain many model calls, so errors compound. A 95%-reliable step repeated 10 times succeeds end-to-end only about 60% of the time. Plan approval checkpoints for any irreversible action."],
+  task:"Take one business process with 6+ steps. Mark which steps an agent could do, which need a human approval, and which should stay manual.",
+  res:[["Anthropic: Building effective agents","https://www.anthropic.com/research/building-effective-agents"]]},
+ {id:"2.4",t:"Evaluation: the core AI management skill",topics:["Golden datasets and test sets","Automated metrics vs human review","LLM-as-judge and its biases","Regression testing on every change","Red-teaming and adversarial tests"],
+  deep:["Evals are your acceptance criteria. Without an eval set you cannot tell whether a change made the product better or worse, and every discussion becomes opinion.","Start small: 50–100 real examples with expected outcomes, reviewed by domain experts. Grow it every time a bug appears in production."],
+  task:"Create a 30-row eval sheet for the RAID-log prompt from 2.1: input, expected output, scoring rubric (1–5), and score two prompt versions.",
+  res:[["Hamel Husain: Your AI product needs evals","https://hamel.dev/blog/posts/evals/"]]}
+]},
+{n:3,name:"Data Strategy",weeks:[6,7],intro:"Data decides AI project success more than model choice. Learn to assess, plan and govern it.",mods:[
+ {id:"3.1",t:"Data readiness assessment",topics:["Availability, volume and representativeness","Data quality dimensions","Labeling: in-house, vendor, synthetic","Data lineage and ownership"],
+  deep:["Ask four questions before committing to any AI project: Do we have the data? Is it representative of real use? Are we allowed to use it? Who owns fixing it?","Labeling is often the largest hidden cost and timeline risk. Estimate it explicitly: items × minutes per item × review rate."],
+  task:"Run a data readiness scorecard (1–5 per dimension) for one AI idea at your organisation.",
+  res:[["Chip Huyen, Designing Machine Learning Systems (O'Reilly)","https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/"]]},
+ {id:"3.2",t:"Privacy, rights and data contracts",topics:["GDPR basics for AI: lawful basis, purpose limitation, DPIA","Personal data in prompts and logs","Copyright and licensing of training data","Data contracts between teams"],
+  deep:["Prompts and logs often contain personal data. Decide retention, masking and vendor processing terms (DPA) before go-live, not after.","A data contract specifies schema, freshness and quality guarantees between producer and consumer teams. It turns 'the data changed' from a surprise into a managed change."],
+  task:"Draft a one-page data contract for the source system feeding your policy assistant from 2.2.",
+  res:[["EDPB guidance on AI and data protection","https://www.edpb.europa.eu/"]]}
+]},
+{n:4,name:"AI Delivery & Product Management",weeks:[8,10],intro:"Adapt your project methods to uncertainty: discovery, experiments, metrics and AI-specific requirements.",mods:[
+ {id:"4.1",t:"Use-case discovery and prioritisation",topics:["Finding problems worth solving with AI","Value / feasibility / risk scoring","Proof of concept vs pilot vs production","Kill criteria"],
+  deep:["Most failed AI projects solved a problem nobody prioritised, or lacked data. Score both before funding.","Define kill criteria before the PoC starts, for example: 'If we cannot reach 80% correct on the eval set in 4 weeks, we stop.' That makes stopping a success, not a failure."],
+  task:"List 10 AI use cases for a company you know. Score and plot them on a 2×2 (value vs feasibility) and mark the risk level.",
+  res:[["Google PAIR People + AI Guidebook","https://pair.withgoogle.com/guidebook/"]]},
+ {id:"4.2",t:"Methodologies for AI projects",topics:["CRISP-DM and CPMAI phases","Agile with experiment sprints","Stage gates for AI","Estimating under uncertainty: time-boxing"],
+  deep:["CPMAI phases: business understanding, data understanding, data preparation, model development, evaluation, operationalisation. It is iterative: you will loop back from evaluation to data often.","Replace 'estimate the feature' with 'time-box the experiment'. Commit to learning by a date, not to an outcome by a date."],
+  task:"Convert one of your past project plans into an AI-style plan with three experiment gates and explicit exit criteria.",
+  res:[["PMI-CPMAI overview","https://www.pmi.org/certifications/cpmai"]]},
+ {id:"4.3",t:"Metrics that connect model to business",topics:["Offline metrics: accuracy, precision, recall, F1","Online metrics: adoption, task success, time saved","Guardrail metrics: harm, escalations, cost","A/B testing and staged rollout"],
+  deep:["Precision answers 'when it says yes, how often is it right?'. Recall answers 'of all real yes cases, how many did it catch?'. The trade-off between them is a business decision you own: a fraud model and a spam filter want different balances.","Build a metric chain: eval score → user task success → business KPI. If one link is missing, you cannot prove value."],
+  task:"Write a metric chain for a document-classification feature, including one guardrail metric and target thresholds.",
+  res:[["Google ML Crash Course: Classification metrics","https://developers.google.com/machine-learning/crash-course/classification"]]},
+ {id:"4.4",t:"Writing the AI PRD and UX for AI",topics:["AI PRD sections: eval plan, failure handling, fallback","Designing for errors and uncertainty","Human oversight and override","Setting user expectations"],
+  deep:["An AI PRD adds what a normal PRD lacks: the eval set, acceptable error rate, behaviour on low confidence, fallback path, and how users give feedback.","Design for the wrong answer as carefully as the right one. Show sources, allow edits, and make escalation to a human easy."],
+  task:"Write a full AI PRD (3–5 pages) for one prioritised use case from 4.1. This becomes a portfolio piece.",
+  res:[["Microsoft HAX Toolkit: Guidelines for Human-AI Interaction","https://www.microsoft.com/en-us/haxtoolkit/"]]}
+]},
+{n:5,name:"MLOps, LLMOps & Operations",weeks:[11,12],intro:"AI products need running, not just shipping. Learn what operations looks like and how to staff it.",mods:[
+ {id:"5.1",t:"Deployment and monitoring",topics:["Model serving, APIs and latency budgets","Data and concept drift","Observability: tracing prompts and responses","Feedback loops from users"],
+  deep:["Drift means the world changed and the model did not. Customer language, products and regulations change, so plan scheduled re-evaluation in the operating budget.","Trace every request (input, retrieved context, output, cost, latency). Without traces, production bugs cannot be debugged."],
+  task:"Define a monitoring dashboard spec: 6 metrics, alert thresholds, and the owner of each alert.",
+  res:[["Google: MLOps continuous delivery and automation","https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning"]]},
+ {id:"5.2",t:"Cost, security and incident management",topics:["Token cost control: caching, routing, smaller models","Prompt injection and data leakage","Vendor lock-in and model deprecation","AI incident response runbook"],
+  deep:["Model providers retire versions. Treat a model upgrade like a dependency upgrade: re-run evals, compare, then switch.","Prompt injection lets content (an email, a web page) hijack the model's instructions. Any assistant that reads external content and can take actions needs explicit controls."],
+  task:"Write an AI incident runbook: severity levels, rollback options (previous prompt, previous model, feature flag off), and comms plan.",
+  res:[["OWASP Top 10 for LLM Applications","https://genai.owasp.org/"]]}
+]},
+{n:6,name:"Responsible AI & Governance",weeks:[13,14],intro:"Regulation is now part of delivery, especially in the EU. Learn to classify risk and build compliance into your plans.",mods:[
+ {id:"6.1",t:"EU AI Act for project leaders",topics:["Risk tiers: prohibited, high-risk, limited (transparency), minimal","Obligations for providers vs deployers","General-purpose AI model rules","Phased application dates and their status","AI literacy obligation for staff"],
+  deep:["The Act classifies by use, not technology. The same model can be minimal-risk in a chatbot and high-risk in hiring or credit scoring. Classification is your first governance gate.","Prohibitions and AI-literacy duties have applied since February 2025, and general-purpose AI rules since August 2025. High-risk obligations were scheduled for 2026–2027, and EU proposals to simplify and delay parts of the timeline were under discussion, so always check the current official status before planning."],
+  task:"Classify five use cases under the AI Act risk tiers and list the obligations that would apply to your organisation as deployer.",
+  res:[["EU AI Act Explorer","https://artificialintelligenceact.eu/"],["European Commission AI Act page","https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai"]]},
+ {id:"6.2",t:"Frameworks: NIST AI RMF and ISO/IEC 42001",topics:["NIST AI RMF: Govern, Map, Measure, Manage","ISO/IEC 42001 AI management system","AI impact assessments","Model cards and documentation"],
+  deep:["NIST AI RMF gives you a vocabulary and checklist; ISO/IEC 42001 gives a certifiable management system, similar in shape to ISO 27001. Many organisations use NIST to design controls and 42001 to prove them.","Documentation is a deliverable. Plan model cards, data sheets and decision logs in the WBS."],
+  task:"Map one project onto the four NIST functions and list two concrete controls per function.",
+  res:[["NIST AI Risk Management Framework","https://www.nist.gov/itl/ai-risk-management-framework"],["ISO/IEC 42001","https://www.iso.org/standard/81230.html"]]},
+ {id:"6.3",t:"Fairness, explainability and oversight",topics:["Sources of bias in data and labels","Fairness metrics and their trade-offs","Explainability: what users and auditors need","Meaningful human oversight"],
+  deep:["Bias usually enters through historical data that reflects past decisions. Test performance per user segment, not only on average.","A human 'in the loop' who approves 500 items an hour is not real oversight. Design review volume, tools and authority so the human can actually intervene."],
+  task:"Write a fairness test plan: segments to compare, metric, threshold, and what happens if a gap is found.",
+  res:[["Google PAIR: Explorables","https://pair.withgoogle.com/explorables/"]]}
+]},
+{n:7,name:"Leadership, Strategy & Capstone",weeks:[15,16],intro:"Lead AI at portfolio level: business cases, teams, change management, then prove it all in a capstone.",mods:[
+ {id:"7.1",t:"Build vs buy and the AI business case",topics:["Build, buy, or partner decision criteria","Total cost of ownership incl. run costs","ROI and value realisation tracking","Vendor evaluation with your own evals"],
+  deep:["Never accept a vendor demo as evidence. Run their product on your eval set with your data.","Business cases should include ongoing evaluation, monitoring and re-training costs. These commonly exceed build cost within two years."],
+  task:"Write a two-page build vs buy recommendation for one use case, including a 3-year TCO table.",
+  res:[["McKinsey: The state of AI (annual survey)","https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai"]]},
+ {id:"7.2",t:"Teams, roles and change management",topics:["Roles: data engineer, ML engineer, AI engineer, data scientist, domain expert","Team topologies for AI (central, hub-and-spoke, embedded)","Adoption and trust building","Communicating uncertainty to executives"],
+  deep:["Adoption is where value is won or lost. Plan training, champions and feedback channels in the project, not as an afterthought.","Report AI progress as learning: what we tested, what we learned, what we decide next. Executives accept uncertainty when it is visible and bounded."],
+  task:"Create a RACI for an AI feature launch covering data, model, eval, legal, security, support and business owner.",
+  res:[["Team Topologies (Skelton & Pais)","https://teamtopologies.com/"]]},
+ {id:"7.3",t:"Capstone: lead an AI initiative end to end",cap:true,topics:["Choose a real problem and write the AI PRD","Build a no-code RAG prototype (e.g. a custom GPT, Claude Project or Copilot Studio)","Create and run a 50-question eval set","Complete an AI Act classification and risk register","Present a 10-slide go / no-go decision to stakeholders"],
+  deep:["The capstone is your portfolio. Hiring managers for AI PM roles look for evidence that you can define quality, manage data risk and make a reasoned go / no-go call.","Document your failures honestly. A clear account of what did not work and why is more convincing than a polished demo."],
+  task:"Publish the capstone as a case study (blog, LinkedIn article or PDF) and link it on your CV.",
+  res:[["Notion / Google Docs template for case studies","https://www.notion.so/templates"]]}
+]}
+];
+
+
+const yt=q=>"https://www.youtube.com/results?search_query="+encodeURIComponent(q);
+const EXTRA={
+"1.1":{v:[["AI for Everyone by Andrew Ng - YouTube", "https://www.youtube.com/watch?v=JPcx9qHzzgk"],["But what is a neural network? (3Blue1Brown)","https://www.youtube.com/watch?v=aircAruvnKk"],["Machine Learning Fundamentals: Bias and Variance", "https://www.youtube.com/watch?v=EuBBz3bI-aA"],["Machine Learning Fundamentals: Cross Validation", "https://www.youtube.com/watch?v=fSytzGwwBVw"]],
+ q:["Which data was the model evaluated on, and was any of it seen during training?","What does the simplest rule-based baseline score?","What happens when the model is wrong, and who notices?"]},
+"1.2":{v:[["Intro to Large Language Models (Andrej Karpathy, 1 h)","https://www.youtube.com/watch?v=zjkBMFhNj_g"],["Deep Dive into LLMs like ChatGPT (Karpathy, 3.5 h)","https://www.youtube.com/watch?v=7xTGNNLPyMI"],["But what is a GPT? Visual intro to transformers (3Blue1Brown)","https://www.youtube.com/watch?v=wjZofJX0v4M"],["Attention in transformers, visually explained", "https://www.youtube.com/watch?v=eMlx5fFNoYc"],["How I use LLMs", "https://www.youtube.com/watch?v=EWvNQjAaOHw"]],
+ q:["How large is the context window, and what happens when input exceeds it?","How do we detect and measure hallucinations here?","Is temperature set deliberately for this task?"]},
+"1.3":{v:[["Stanford CS229: Building Large Language Models", "https://www.youtube.com/watch?v=b4Fz2duT_iQ"],["What is an \"open\" AI model and what is right for you?", "https://www.youtube.com/watch?v=1xPzH5_dt5Q"],["LLM Inference: Cost vs. Latency vs. Throughput", "https://www.youtube.com/watch?v=oLu-KGJ_x0E"]],
+ q:["What is the cost per task at expected monthly volume?","Has a smaller model been tested against the same evals?","What is the p95 latency, and is it acceptable for users?"]},
+"2.1":{v:[["ChatGPT Prompt Engineering for Developers (OpenAI & DeepLearning.AI)", "https://www.youtube.com/watch?v=H4YK_7MAckk"],["AI prompt engineering: A deep dive (Anthropic)", "https://www.youtube.com/watch?v=T9aRN5JkmL8"],["Official ChatGPT Prompt Engineering Guide From OpenAI", "https://www.youtube.com/watch?v=lTI4FyO0ul8"]],
+ q:["Where are prompts stored and versioned?","Which eval runs automatically on a prompt change?","Who reviews and approves prompt changes?"]},
+"2.2":{v:[["Learn RAG From Scratch", "https://www.youtube.com/watch?v=sVcwVQRHIc8"],["What is Retrieval-Augmented Generation (RAG)? (IBM Technology)", "https://www.youtube.com/watch?v=T-D1OfcDW1M"],["Vector Databases simply explained! (Embeddings & Indexes)", "https://www.youtube.com/watch?v=dN0lsF2cvm4"]],
+ q:["When an answer is wrong, was the right passage retrieved?","How are document permissions enforced at retrieval time?","How often is the index refreshed, and who owns it?"]},
+"2.3":{v:[["Building more effective AI agents (Anthropic)", "https://www.youtube.com/watch?v=uhJJgc-0iTQ"],["What's next for AI agentic workflows (Andrew Ng)", "https://www.youtube.com/watch?v=sal78ACtGTc"],["RAG vs Fine-Tuning vs Prompt Engineering (IBM Technology)", "https://www.youtube.com/watch?v=zYGDpG-pTho"],["LLM Function Calling Explained", "https://www.youtube.com/watch?v=kwvA2Cxntuw"]],
+ q:["Which agent actions are irreversible, and where is human approval?","What is the end-to-end success rate, not per step?","Why fine-tune instead of better prompts or RAG?"]},
+"2.4":{v:[["Why AI evals are the hottest new skill for product builders (Hamel Husain & Shreya Shankar)", "https://www.youtube.com/watch?v=BsWxPI9UM4c"],["Evaluating and Debugging Generative AI (DeepLearning.AI)", "https://www.youtube.com/watch?v=UHFTY0B718s"],["LLM-as-a-judge: evaluating LLMs with LLMs", "https://www.youtube.com/watch?v=Qj3u_kzfJVo"],["Red Teaming LLM Applications (DeepLearning.AI & Giskard)", "https://www.youtube.com/watch?v=npAcymuDmeA"]],
+ q:["How many examples are in the eval set, and who labelled them?","How often do automatic scores agree with human reviewers?","Was every production bug added to the eval set?"]},
+"3.1":{v:[["Andrew Ng: From model-centric to data-centric AI", "https://www.youtube.com/watch?v=06-AZXmwHjo"],["MIT Lecture 1: Data-Centric AI vs. Model-Centric AI", "https://www.youtube.com/watch?v=ayzOzZGHZy4"],["Data Quality in Six Dimensions", "https://www.youtube.com/watch?v=1nJy0A3EwI4"]],
+ q:["Is the data representative of real users and edge cases?","What is the labeling cost and timeline estimate?","Who owns fixing data quality issues?"]},
+"3.2":{v:[["GDPR & AI: Data protection requirements + AI Act insights", "https://www.youtube.com/watch?v=M8xgxIqHk_k"],["Data Contracts: The Key to Data Quality (Chad Sanderson)", "https://www.youtube.com/watch?v=yNLVmhKp8wM"],["What is a DPIA? GDPR Data Protection Impact Assessment", "https://www.youtube.com/watch?v=pJZTIQsS1tg"]],
+ q:["What personal data ends up in prompts and logs, and how long is it kept?","Is there a signed DPA with every model vendor?","Do we have the rights to use this data for this purpose?"]},
+"4.1":{v:[["Andrew Ng: Bridging AI's proof-of-concept to production gap", "https://www.youtube.com/watch?v=tsPuVAMaADY"],["Getting Started with the People + AI Guidebook (Google)", "https://www.youtube.com/watch?v=n3HsvqBJrlY"],["Why most AI products fail: lessons from 50+ deployments (Lenny's Podcast)", "https://www.youtube.com/watch?v=xLyFl0QrJpc"]],
+ q:["What is the business value if it works only 80% of the time?","What are the kill criteria, and who decides?","Is this a PoC, a pilot or production, and what changes between them?"]},
+"4.2":{v:[["Introduction to the CRISP-DM Methodology", "https://www.youtube.com/watch?v=q_okDS2RtzY"],["CPMAI Training & Certification Overview", "https://www.youtube.com/watch?v=qFK0Ypya4xc"],["Agile in Data Science: How to split ML stories", "https://www.youtube.com/watch?v=qI73C05mf3U"]],
+ q:["What will we learn by the end of this time-box?","Which gate are we at, and what are its exit criteria?","What would make us loop back to data preparation?"]},
+"4.3":{v:[["StatQuest: The Confusion Matrix", "https://www.youtube.com/watch?v=Kdsp6soqA7o"],["StatQuest: Sensitivity, Specificity, Precision, Recall", "https://www.youtube.com/watch?v=PWvfrTgaPBI"],["A/B Testing 101: A crash course for product managers", "https://www.youtube.com/watch?v=8mdpWElyhEU"]],
+ q:["Which costs more for this use case: false positives or false negatives?","How does the eval score link to a business KPI?","Which guardrail metric would stop the rollout?"]},
+"4.4":{v:[["Designing AI for Uncertainty (Eric Horvitz)", "https://www.youtube.com/watch?v=QlKFSeIaPCw"],["Guidelines for Human-AI Interaction (Saleema Amershi, Microsoft)", "https://www.youtube.com/watch?v=Kj33wtIMG-Y"],["How to use AI to create a product requirements doc", "https://www.youtube.com/watch?v=gLOyKIiWE4M"]],
+ q:["What does the user see when confidence is low?","How can users correct or report bad output?","What is the fallback when the model is unavailable?"]},
+"5.1":{v:[["ML Ops best practices on Google Cloud", "https://www.youtube.com/watch?v=20h_RTHEtZI"],["Made With ML: Learning how to apply MLOps (Goku Mohandas)", "https://www.youtube.com/watch?v=QlSI_JLYiBQ"],["What is Concept and Data Drift?", "https://www.youtube.com/watch?v=jRM5_Z31y5U"],["LLM Observability: Traces, spans & OpenTelemetry", "https://www.youtube.com/watch?v=c4mDP5Qp7iM"]],
+ q:["Can we trace any production answer back to its inputs and context?","How do we detect drift, and how often do we re-evaluate?","Who is on call for AI quality incidents?"]},
+"5.2":{v:[["Simon Willison: I coined prompt injection", "https://www.youtube.com/watch?v=_bW58o8l0os"],["OWASP Top 10 for LLM Applications 2025: full overview", "https://www.youtube.com/watch?v=j04st4edDKI"],["RouteLLM: Reducing token spend via query routing", "https://www.youtube.com/watch?v=-0C35d8ZtwA"]],
+ q:["What happens when our model version is deprecated?","Can external content trigger actions through the model?","What is our rollback in under 10 minutes?"]},
+"6.1":{v:[["Europe's AI Act: first regulation of artificial intelligence (European Parliament)", "https://www.youtube.com/watch?v=P2krunLNGHo"],["Assessing high-risk AI systems under the EU AI Act", "https://www.youtube.com/watch?v=FsSirP6cU9Y"],["EU AI Act: Deployer or Provider?", "https://www.youtube.com/watch?v=uPSwz1EONk4"]],
+ q:["Which AI Act risk tier is this use case in, and who signed off?","Are we provider or deployer here?","Have staff using the system had AI-literacy training?"]},
+"6.2":{v:[["NIST AI Risk Management Framework explained", "https://www.youtube.com/watch?v=jBj_kFUg0Eg"],["ISO/IEC 42001:2023 explained", "https://www.youtube.com/watch?v=YdPyeVvYtzs"],["Model Card, AI's report card", "https://www.youtube.com/watch?v=3_H7JZKvAuw"]],
+ q:["Which NIST function does each control support?","Where are the model card and decision log stored?","When was the last impact assessment updated?"]},
+"6.3":{v:[["Machine Learning Crash Course: Fairness (Google)", "https://www.youtube.com/watch?v=NIwexiIjASA"],["Fairness, part 1 (Moritz Hardt, MLSS Tübingen)", "https://www.youtube.com/watch?v=Igq_S_7IfOU"],["Model explainability: SHAP & LIME", "https://www.youtube.com/watch?v=vtR8LYjYGTw"]],
+ q:["How does performance differ across user segments?","Can a reviewer actually overturn the AI's decision?","What explanation does an affected person receive?"]},
+"7.1":{v:[["Build, buy, or embed: enterprise AI strategies", "https://www.youtube.com/watch?v=b8mYzN_1vvE"],["Andrew Ng: Opportunities in AI (Stanford)", "https://www.youtube.com/watch?v=5p248yoa3oE"],["How to calculate ROI on AI projects", "https://www.youtube.com/watch?v=jeBJpbDL5q0"]],
+ q:["Did we test the vendor on our own eval set?","What is the 3-year run cost, not just build cost?","How will we measure realised value after launch?"]},
+"7.2":{v:[["Data Engineer vs AI Engineer vs Data Scientist", "https://www.youtube.com/watch?v=eIbZ9UN-7nE"],["Team Topologies (Matthew Skelton & Manuel Pais)", "https://www.youtube.com/watch?v=-b4ycZZH5G8"],["Change management for AI adoption", "https://www.youtube.com/watch?v=y80HkCJgGsQ"]],
+ q:["Who is the accountable business owner?","How will adoption be measured in the first 90 days?","How do we report uncertainty to leadership?"]},
+"7.3":{v:[["How to create a custom GPT (step by step)", "https://www.youtube.com/watch?v=8Ct0rtFA2Hw"],["Microsoft Copilot Studio for beginners", "https://www.youtube.com/watch?v=sBapFKSwJ6Q"],["Go/No-Go decisions in project management", "https://www.youtube.com/watch?v=jZlPDyamGoM"]],
+ q:["Would you defend this go / no-go decision to an auditor?","What did not work, and what did you learn?","What would it take to move this to production?"]}
+};
+PHASES.forEach(p=>p.mods.forEach(m=>{const x=EXTRA[m.id]||{};m.vids=x.v||[];m.qs=x.q||[]}));
+
+const GLOSS=[["Token","A piece of text (roughly ¾ of an English word) that models read and generate. Basis of pricing and limits."],["Context window","Maximum tokens a model can consider at once, input and output combined."],["Embedding","A list of numbers representing meaning, so similar texts sit close together."],["Vector database","Store that finds the embeddings closest to a query. Core of RAG."],["RAG","Retrieval-augmented generation: fetch relevant documents, then let the model answer using them."],["Fine-tuning","Further training a model on your examples to adjust style or narrow skills."],["Hallucination","Confident but false output not supported by the input or facts."],["Eval / eval set","A test collection with expected outcomes, used to measure model quality."],["Precision / recall","Share of positive predictions that are right / share of real positives that are found."],["Drift","Change in real-world data that makes a trained model less accurate over time."],["Guardrail","A check on input or output that blocks or corrects unsafe or off-policy content."],["Agent","A system where a model plans and calls tools across multiple steps toward a goal."],["Prompt injection","Malicious instructions hidden in content the model reads, aiming to override its instructions."],["Human-in-the-loop","A design where a person reviews or approves AI output before it takes effect."],["Model card","Document describing a model's purpose, data, performance and limits."],["Deployer (AI Act)","An organisation using an AI system under its authority, as opposed to the provider who builds it."]];
+
+const KEY="aipm-track-v1";
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// timeline
+const tl=document.getElementById("tl");
+let h="";for(let w=1;w<=16;w++)h+=`<div class="wk">W${w}</div>`;
+PHASES.forEach(p=>{h+=`<a href="#phase-${p.n}" style="--pc:${PCOL[p.n-1]};animation-delay:${p.n*.1}s;grid-column:${p.weeks[0]} / ${p.weeks[1]+1}" title="Phase ${p.n}: ${p.name}">${p.n} · ${p.name}</a>`});
+tl.innerHTML=h;
+
+// curriculum
+const cur=document.getElementById("v-curriculum");
+cur.innerHTML=PHASES.map(p=>`
+<section class="phase" id="phase-${p.n}" style="--pc:${PCOL[p.n-1]}">
+  <div class="rail"><strong>${String(p.n).padStart(2,"0")}</strong>Weeks ${p.weeks[0]}–${p.weeks[1]}<svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><circle class="bg" cx="32" cy="32" r="26"/><circle class="fg" cx="32" cy="32" r="26" data-ring="${p.n}" stroke-dasharray="163.4" stroke-dashoffset="163.4"/><text x="32" y="32" data-rt="${p.n}">0%</text></svg></div>
+  <div class="phase-body">
+    <h2>${p.name}</h2><p>${p.intro}</p>
+    ${p.mods.map(m=>`
+    <details class="mod" id="m-${m.id}">
+      <summary><span class="mod-title"><code>${m.id}</code><h3>${esc(m.t)}</h3></span><span class="chip" data-chip="${m.id}"></span></summary>
+      <div class="mod-inner">
+        <div>
+          <div><div class="lab">Topics</div><ul class="topics">${m.topics.map((t,i)=>{const k=m.id+"-"+i;return `<li><label><input type="checkbox" id="c-${k}" data-k="${k}" data-m="${m.id}" ${done[k]?"checked":""}><span>${esc(t)}</span></label></li>`}).join("")}</ul></div>
+          <div><div class="lab">Deep dive</div><div class="deep">${m.deep.map(d=>`<p>${esc(d)}</p>`).join("")}</div></div>
+        </div>
+        <div>
+          <div><div class="lab">${m.cap?"Final deliverable":"Practice exercise"}</div><p class="task">${esc(m.task)}</p></div>
+          <div><div class="lab">Questions to ask your team</div><ul class="res">${m.qs.map(q=>`<li>${esc(q)}</li>`).join("")}</ul></div>
+          <div><div class="lab">Free videos</div><div class="vgrid">${m.vids.map(r=>`<a class="vcard" href="${r[1]}" target="_blank" rel="noopener"><span class="play" aria-hidden="true">▶</span><span>${esc(r[0])}</span></a>`).join("")}</div></div>
+          <div><div class="lab">Reading</div><ul class="res">${m.res.map(r=>`<li><a href="${r[1]}" target="_blank" rel="noopener">${esc(r[0])}</a></li>`).join("")}</ul></div>
+        </div>
+      </div>
+    </details>`).join("")}
+    <div class="quiz" data-quiz="${p.n}"></div>
+  </div>
+</section>`).join("");
+
+document.getElementById("gloss").innerHTML=GLOSS.map(g=>`<dt>${g[0]}</dt><dd>${esc(g[1])}</dd>`).join("");
+
+let update=function(){
+  let tot=0,d=0;
+  PHASES.forEach(p=>p.mods.forEach(m=>{let md=0;m.topics.forEach((_,i)=>{tot++;if(done[m.id+"-"+i]){d++;md++}});
+    const c=document.querySelector(`[data-chip="${m.id}"]`);c.textContent=`${md}/${m.topics.length}`;c.classList.toggle("done",md===m.topics.length)}));
+  document.getElementById("pbar").style.width=(tot?d/tot*100:0)+"%";
+  document.getElementById("ptext").textContent=`${d} of ${tot} topics done`;
+}
+cur.addEventListener("change",e=>{const k=e.target.dataset.k;if(!k)return;if(e.target.checked)done[k]=1;else delete done[k];save();update()});
+document.getElementById("reset").addEventListener("click",()=>{done={};save();cur.querySelectorAll("input[type=checkbox]").forEach(i=>i.checked=false);update()});
+update();
+
+
+const LIB=[
+{h:"1. Start here: the AI basics every manager needs",e:"Course",items:[
+["AI For Everyone","Andrew Ng · Coursera (free to audit) · ~6 h","https://www.coursera.org/learn/ai-for-everyone","Non-technical. What AI can and can't do, how AI projects are chosen and run, and how to build an AI team.","Phase 1"],
+["Generative AI for Everyone","Andrew Ng · Coursera (free to audit) · ~3 h","https://www.coursera.org/learn/generative-ai-for-everyone","How LLMs work, where they fit in business workflows, and how to scope a generative AI project.","Phases 1–2"],
+["Intro to Large Language Models","Andrej Karpathy · YouTube · 1 h","https://www.youtube.com/watch?v=zjkBMFhNj_g","The single best hour to understand what an LLM really is, including its risks.","Phase 1"]]},
+{h:"2. Run AI projects: delivery and product",e:"Guide",items:[
+["Machine Learning Yearning","Andrew Ng · free book · ~3 h","https://www.google.com/search?q=Machine+Learning+Yearning+Andrew+Ng+pdf","Short chapters on test sets, error analysis and when to get more data. Written for people who lead ML teams.","Phase 4"],
+["People + AI Guidebook","Google PAIR · free · ~2 h","https://pair.withgoogle.com/guidebook/","How to define user needs, set expectations, and design for AI mistakes. Ready-made worksheets.","Phase 4"],
+["Rules of Machine Learning","Google · free · ~1 h","https://developers.google.com/machine-learning/guides/rules-of-ml","Practical rules from Google production ML. Rule 1: don't be afraid to launch without ML.","Phases 4–5"],
+["Your AI Product Needs Evals","Hamel Husain · blog · 30 min","https://hamel.dev/blog/posts/evals/","Why evals are the core of AI quality, and how to set them up. The key skill for AI PMs.","Phase 2"]]},
+{h:"3. Govern AI: risk, regulation, responsibility",e:"Framework",items:[
+["EU AI Act Explorer + Compliance Checker","Future of Life Institute · free","https://artificialintelligenceact.eu/","Plain-language access to the Act and a quick tool to check which rules apply to your use case.","Phase 6"],
+["NIST AI Risk Management Framework","NIST · free","https://www.nist.gov/itl/ai-risk-management-framework","The standard vocabulary for AI risk: Govern, Map, Measure, Manage. Use its Playbook as a checklist.","Phase 6"],
+["OWASP Top 10 for LLM Applications","OWASP · free · 30 min","https://genai.owasp.org/","The ten security risks to review with your team before any LLM launch.","Phase 5"]]},
+{h:"4. Lead and stay current",e:"Report",items:[
+["Building Effective Agents","Anthropic · article · 20 min","https://www.anthropic.com/research/building-effective-agents","When to use simple workflows vs agents. Helps you challenge over-engineered proposals.","Phase 2"],
+["The State of AI","McKinsey · annual survey","https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai","How companies adopt AI and where value appears. Useful for business cases.","Phase 7"],
+["AI Index Report","Stanford HAI · annual","https://hai.stanford.edu/ai-index","Read the summary chapter each year to stay current on cost, capability and policy trends.","Phase 7"]]}
+];
+document.getElementById("v-library").innerHTML=`<section class="extra"><span class="eyebrow">Free library</span><h2>The essential reading list</h2><p class="lede">Only what a project or product manager needs to become an AI PM. Work through it in order alongside the curriculum: about 20 hours in total.</p></section>`+LIB.map(g=>`<section class="extra"><span class="eyebrow">${g.items.length} picks</span><h2>${g.h}</h2><div class="grid2">${g.items.map(i=>`<div class="card"><span class="tag">${g.e} · ${i[4]}</span><h3><a href="${i[2]}" target="_blank" rel="noopener">${esc(i[0])}</a></h3><p style="font-family:var(--mono);font-size:.78rem">${esc(i[1])}</p><p>${esc(i[3])}</p></div>`).join("")}</div></section>`).join("")+`<p class="lede" style="font-size:.88rem;margin-top:24px">13 hand-picked free resources, chosen for project and product managers moving into AI leadership. No coding or maths needed.</p>`;
+
+
+
+// ---------- confetti & toast ----------
+const cv=document.getElementById("confetti"),cx2=cv.getContext("2d");let parts=[],raf=0;
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function confetti(n=140){if(RM)return;cv.width=innerWidth;cv.height=innerHeight;for(let i=0;i<n;i++)parts.push({x:innerWidth/2,y:innerHeight*.35,vx:(Math.random()-.5)*14,vy:Math.random()*-12-4,r:Math.random()*6+3,c:PCOL[i%7],a:Math.random()*6,life:0});if(!raf)tick()}
+function tick(){cx2.clearRect(0,0,cv.width,cv.height);parts.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;p.life++;cx2.save();cx2.translate(p.x,p.y);cx2.rotate(p.a);cx2.fillStyle=p.c;cx2.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);cx2.restore()});parts=parts.filter(p=>p.y<cv.height+40&&p.life<240);raf=parts.length?requestAnimationFrame(tick):(cx2.clearRect(0,0,cv.width,cv.height),0)}
+let tt;function toast(t){const el=document.getElementById("toast");el.textContent=t;el.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("show"),2600)}
+cur.addEventListener("change",e=>{const id=e.target.dataset.m;if(!id||!e.target.checked)return;const m=PHASES.flatMap(p=>p.mods).find(x=>x.id===id);if(m.topics.every((_,i)=>done[id+"-"+i])){confetti();toast(`Module ${id} complete. Nice work!`)}});
+
+// ---------- quizzes ----------
+const QUIZ={
+1:[["A model scores 98% accuracy. What should you ask first?",["Which model architecture was used?","Was it measured on data the model never saw in training?","How many GPUs were used?"],1,"High scores on seen data often mean overfitting. Always ask about a held-out test set."],
+["Why can an LLM state false facts confidently?",["It predicts likely text, not verified facts","It is connected to an outdated database","Temperature is always too high"],0,"LLMs generate plausible next tokens. Grounding and evals reduce, but don't remove, hallucination."],
+["Which drives LLM run cost most directly?",["Number of engineers","Tokens in and out per request × volume","Size of the training set"],1,"Cost scales with tokens per call and call volume."]],
+2:[["Answers from your RAG assistant are wrong. First check?",["Whether the right passage was retrieved","Switch to a bigger model","Fine-tune immediately"],0,"Separate retrieval failure from generation failure; they have different fixes."],
+["A 10-step agent with 95% reliability per step succeeds end-to-end about…",["95%","80%","60%"],2,"0.95^10 ≈ 0.60. Errors compound across steps."],
+["What is an eval set?",["A list of model vendors","Real examples with expected outcomes used to score quality","A cloud budget"],1,"Evals are the acceptance criteria of AI products."]],
+3:[["Which is often the largest hidden cost in an AI project?",["Labeling data","Buying laptops","Writing the PRD"],0,"Estimate labeling explicitly: items × minutes × review rate."],
+["Prompts and logs may contain personal data. When do you decide retention and masking?",["After launch","Before go-live","Only if a user complains"],1,"GDPR obligations apply from the first production request."],
+["A data contract defines…",["Salary of data engineers","Schema, freshness and quality guarantees between teams","The model's license"],1,"It turns surprise data changes into managed changes."]],
+4:[["Kill criteria should be defined…",["Before the PoC starts","After the PoC fails","Never"],0,"Setting them up front makes stopping a valid, planned outcome."],
+["Precision answers which question?",["Of all real positives, how many did we catch?","When the model says yes, how often is it right?","How fast is the model?"],1,"Recall is the other one: share of real positives found."],
+["What does an AI PRD add vs a normal PRD?",["A Gantt chart","Eval plan, acceptable error rate, fallback behaviour","A logo"],1,"Design for the wrong answer as carefully as the right one."]],
+5:[["Model drift means…",["The vendor raised prices","The world changed and the model did not","The model was deleted"],1,"Plan scheduled re-evaluation in the operating budget."],
+["Your provider retires a model version. You should…",["Swap silently","Re-run evals, compare, then switch","Stop the product"],1,"Treat model upgrades like dependency upgrades."],
+["Prompt injection is…",["Hidden instructions in content that hijack the model","A faster way to write prompts","A pricing model"],0,"Critical when an assistant reads external content and can take actions."]],
+6:[["The EU AI Act classifies risk by…",["Model size","Use case","Programming language"],1,"The same model can be minimal-risk in one use and high-risk in another."],
+["AI used to screen job applicants is typically…",["Minimal risk","High risk","Prohibited"],1,"Employment is listed in Annex III high-risk areas."],
+["Meaningful human oversight requires…",["A human who can realistically review and overturn decisions","Any human clicking approve","No humans"],0,"Rubber-stamping 500 items an hour is not oversight."]],
+7:[["A vendor demo looks great. Best next step?",["Sign the contract","Run their product on your own eval set","Ask for a discount"],1,"Never accept a demo as evidence."],
+["Where is AI value most often lost?",["Model training","Adoption by users","Cloud region choice"],1,"Plan training, champions and feedback in the project."],
+["How should you report AI progress to executives?",["Only when finished","As learning: tested, learned, next decision","Hide uncertainty"],1,"Visible, bounded uncertainty builds trust."]]};
+let qs={};try{qs=JSON.parse(localStorage.getItem(KEY+"-quiz")||"{}")}catch(e){}
+function renderQuiz(n){const el=document.querySelector(`[data-quiz="${n}"]`),Q=QUIZ[n];const right=Q.filter((q,i)=>qs[n+"-"+i]===q[2]).length,answered=Q.filter((_,i)=>qs[n+"-"+i]!==undefined).length;
+ el.innerHTML=`<h3>Check yourself: Phase ${n}<span class="score">${right}/${Q.length} correct${answered===Q.length?' · <button class="reset" data-retry="'+n+'" type="button">Retry</button>':''}</span></h3>`+Q.map((q,i)=>{const a=qs[n+"-"+i];return `<div class="q"><p>${i+1}. ${esc(q[0])}</p><div class="opts">${q[1].map((o,j)=>`<button type="button" data-q="${n}-${i}" data-o="${j}" ${a!==undefined?"disabled":""} class="${a!==undefined&&j===q[2]?"right":a===j?"wrong":""}">${esc(o)}</button>`).join("")}</div>${a!==undefined?`<p class="why">${a===q[2]?"Correct. ":"Not quite. "}${esc(q[3])}</p>`:""}</div>`}).join("")}
+Object.keys(QUIZ).forEach(renderQuiz);
+cur.addEventListener("click",e=>{const b=e.target.closest("button[data-q]");const r=e.target.closest("[data-retry]");
+ if(r){const n=r.dataset.retry;QUIZ[n].forEach((_,i)=>delete qs[n+"-"+i]);try{localStorage.setItem(KEY+"-quiz",JSON.stringify(qs))}catch(x){}renderQuiz(n);return}
+ if(!b||!b.closest('.quiz'))return;const[n,i]=b.dataset.q.split("-");qs[b.dataset.q]=+b.dataset.o;try{localStorage.setItem(KEY+"-quiz",JSON.stringify(qs))}catch(x){}renderQuiz(n);
+ const Q=QUIZ[n];if(Q.every((q,k)=>qs[n+"-"+k]===q[2])){confetti(200);toast(`Perfect score on Phase ${n}!`)}});
+
+// ---------- playground ----------
+const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString("en-US");
+function cost(){const v=+$("cv").value,i=+$("ci").value,o=+$("co").value;$("cvo").value=fmt(v);$("cio").value=fmt(i);$("coo").value=fmt(o);
+ const T=[["Small",.25,1.25,"#1FA971"],["Mid",3,15,"#2E86DE"],["Large",15,75,"#E0457B"]].map(t=>[t[0],v*(i*t[1]+o*t[2])/1e6,t[3]]);const mx=Math.max(...T.map(t=>t[1]));
+ $("cbars").innerHTML=T.map(t=>`<div><span>${t[0]}</span><i style="width:${Math.max(2,t[1]/mx*100)}%;background:${t[2]}"></i><span>$${fmt(Math.round(t[1]))}/mo</span></div>`).join("")}
+["cv","ci","co"].forEach(id=>$(id).addEventListener("input",cost));cost();
+function agent(run){const r=+$("ar").value/100,n=+$("as").value;$("aro").value=(r*100).toFixed(1)+"%";$("aso").value=n;$("aout").textContent=(Math.pow(r,n)*100).toFixed(1)+"%";
+ let fail=-1;if(run){for(let k=0;k<n;k++)if(Math.random()>r){fail=k;break}}
+ $("achain").innerHTML=Array.from({length:n},(_,k)=>`<span style="background:${!run?"#8E5CE0":fail===-1||k<fail?"#1FA971":k===fail?"#E2445C":"#B9B3C9"}">${k+1}</span>`).join("");
+ if(run)toast(fail===-1?"Run succeeded end to end":"Run failed at step "+(fail+1))}
+["ar","as"].forEach(id=>$(id).addEventListener("input",()=>agent(false)));$("arun").addEventListener("click",()=>agent(true));agent(false);
+const EM=[.95,.9,.88,.83,.8,.76,.72,.7,.65,.6,.58,.55,.52,.48,.45,.4,.38,.33,.3,.25,.2,.15,.1,.05].map((sc,i)=>({sc,spam:[1,1,1,1,0,1,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0][i]}));
+function pr(){const t=+$("pt").value;$("pto").value=t.toFixed(2);let tp=0,fp=0,fn=0;
+ $("pdots").innerHTML=EM.map(e=>{const f=e.sc>=t;if(f&&e.spam)tp++;else if(f)fp++;else if(e.spam)fn++;return `<span title="score ${e.sc}" style="background:${e.spam?"#1FA971":"#9C95B0"};outline:${f?"3px solid #FF7A3D":"none"};outline-offset:2px;opacity:${f?1:.55}">${Math.round(e.sc*100)}</span>`}).join("");
+ const P=tp+fp?tp/(tp+fp):1,R=tp/(tp+fn);$("pstats").innerHTML=`<div><b>${tp}</b>caught spam</div><div><b>${fp}</b>good mail flagged</div><div><b>${fn}</b>spam missed</div><div><b>${Math.round(P*100)}%</b>precision</div><div><b>${Math.round(R*100)}%</b>recall</div>`}
+$("pt").addEventListener("input",pr);pr();
+const UC=[["Spam filter","Minimal risk","No specific AI Act duties beyond AI literacy. Good practice still applies.","#1FA971"],["Customer chatbot","Limited risk (transparency)","Users must be told they are talking to an AI.","#2E86DE"],["Deepfake generator for ads","Limited risk (transparency)","Generated content must be labelled as AI-made.","#2E86DE"],["CV screening for hiring","High risk","Risk management, data governance, logging, human oversight, accuracy and documentation duties.","#FF7A3D"],["Credit scoring","High risk","Same high-risk duties; deployers may need a fundamental-rights impact assessment.","#FF7A3D"],["Social scoring by government","Prohibited","Banned since February 2025.","#E2445C"],["Emotion recognition at work","Prohibited","Banned in workplaces and schools except for medical or safety reasons.","#E2445C"]];
+$("uc").innerHTML=UC.map((u,i)=>`<button type="button" data-u="${i}">${u[0]}</button>`).join("");
+function tier(i){const u=UC[i];document.querySelectorAll("#uc button").forEach(b=>b.classList.toggle("on",+b.dataset.u===i));$("tier").style.background=`color-mix(in srgb,${u[3]} 18%,var(--surface))`;$("tier").innerHTML=`<b style="color:${u[3]}">${u[1]}</b>${u[2]}`}
+$("uc").addEventListener("click",e=>{const b=e.target.closest("button");if(b)tier(+b.dataset.u)});tier(3);
+
+
+// ---------- feature design studio ----------
+const STEPS=[
+["Problem","Whose pain, how often, how costly today?","Start from a measurable pain, never from 'we should use AI'.","Problem","#FF7A3D"],
+["Why AI?","Would rules, search or a better form solve it?","AI fits when inputs are messy (text, images) and patterns are too many for rules.","Why AI","#F2A60C"],
+["Data","What data exists, who owns it, may we use it?","No representative, legal data means no feature. Check before you plan.","Data","#1FA971"],
+["AI approach","Classify, predict, extract, generate, search or act?","Pick the simplest pattern: prompt, RAG, classic ML, fine-tune, agent.","Approach","#2E86DE"],
+["Success","Eval metric, user metric, business KPI, guardrail.","Connect model quality to business value with a metric chain.","Metrics","#8E5CE0"],
+["Failure","What happens when it's wrong? Who is harmed?","Design the wrong-answer path first: confidence, fallback, human review.","Failure","#E0457B"],
+["Risk & rules","AI Act tier, GDPR, bias, security.","Classify early. High-risk changes timeline, budget and documentation.","Risk","#13A3A3"],
+["MVP & rollout","Smallest test, kill criteria, staged launch.","Time-box an experiment, then pilot with real users, then scale.","MVP","#6C3CE0"]];
+$("steps").innerHTML=STEPS.map((x,i)=>`<div class="step" style="--pc:${x[4]}"><span class="n">${i+1}</span><h3>${x[0]}</h3><em>${x[1]}</em><p>${x[2]}</p></div>`).join("");
+const CASES=[
+{d:"Customer support",c:"#2E86DE",f:"Draft replies for support agents",t:["Limited risk","#2E86DE"],
+ s:["Agents spend 6 min per ticket; 60% are repeat questions.","Language varies endlessly, so rules fail. Answers live in help articles: a good RAG fit.","Help centre, past resolved tickets (mask personal data), product docs.","RAG over help articles + LLM drafts a reply. Agent edits and sends.","Eval: 100 real tickets scored for correctness. User: % drafts sent with small edits. KPI: handle time. Guardrail: complaint rate.","Agent always reviews. Low retrieval confidence → no draft, show sources instead.","Tell customers if replies are AI-assisted. Prompt injection via customer emails.","2-week pilot with 10 agents on one product line. Kill if edit rate stays above 60%."],
+ l:"Keep a human in the loop at first. It buys you real data to improve the system safely."},
+{d:"Banking",c:"#1FA971",f:"Explain why a card transaction was flagged",t:["Limited risk","#2E86DE"],
+ s:["Customers call support when cards are blocked; calls cost money and trust.","Explanations must combine many signals into plain language: generation fits, the fraud decision itself stays with the existing model.","Fraud model reason codes, transaction data, approved explanation templates.","LLM turns reason codes into a short, approved-wording explanation. No new decisions.","Eval: compliance review of 200 explanations. User: calls avoided. Guardrail: zero leaked fraud rules.","Fallback to template text if output fails a policy check.","Credit decisions would be high risk; this is explanation only. BaFin/EBA expectations, GDPR.","Pilot on app notifications for one card type."],
+ l:"Separate the decision from the explanation. Keep regulated decisions in proven systems."},
+{d:"Healthcare",c:"#E0457B",f:"Summarise patient history before a consultation",t:["High risk if it informs diagnosis","#FF7A3D"],
+ s:["Doctors spend 10+ min reading records before each visit.","Records are long, unstructured text: summarisation fits.","EHR notes, lab results. Health data is special-category under GDPR.","Extractive summary with links to each source sentence. No diagnosis suggestions.","Eval: clinicians rate completeness and errors on 100 records. Guardrail: zero invented facts.","Every statement links to its source. Clinician confirms. Never auto-write to the record.","May qualify as a medical device (MDR) or high risk if used for decisions. DPIA required.","Shadow mode first: summaries generated but compared to doctors' notes, not shown to patients."],
+ l:"In high-stakes domains, traceability to the source is the feature."},
+{d:"E-commerce",c:"#FF7A3D",f:"Conversational product search",t:["Limited risk","#2E86DE"],
+ s:["30% of searches return nothing useful; users leave.","Shoppers describe needs in natural language ('warm jacket for Berlin winter').","Product catalogue, attributes, reviews, search logs.","Embeddings for semantic search + LLM to turn queries into filters.","Eval: 300 real queries with relevant products marked. A/B test: conversion rate. Guardrail: latency under 1 s.","Fall back to keyword search when confidence is low.","Disclose AI assistant; avoid hidden sponsored ranking.","A/B test on 5% of traffic for 2 weeks."],
+ l:"Retail AI wins or loses on latency and A/B tests, not on demos."},
+{d:"HR & recruiting",c:"#8E5CE0",f:"Match job applicants to roles",t:["High risk","#FF7A3D"],
+ s:["Recruiters screen 300 CVs per role.","CVs are unstructured; matching is pattern-heavy.","Historical hiring data, which may encode past bias.","Extract skills, then rank. Recruiter sees reasons, not just a score.","Eval: recruiter agreement; fairness gap across gender and age groups must stay below a set threshold.","Never auto-reject. Recruiter reviews everyone flagged low.","EU AI Act high risk (employment): risk management, logging, human oversight, worker information. Works council involvement in Germany.","Start as a sorting aid in one department with fairness monitoring from day one."],
+ l:"If the AI Act calls it high risk, plan governance work as a full workstream."},
+{d:"Manufacturing",c:"#F2A60C",f:"Predict machine failure",t:["Minimal risk","#1FA971"],
+ s:["Unplanned downtime costs thousands of euros per hour.","Sensor patterns before failures are too complex for fixed thresholds.","Sensor time series, maintenance logs. Failures are rare: few examples.","Classic ML anomaly detection, not an LLM.","Eval: recall on past failures, false alarms per week. KPI: downtime hours.","Too many false alarms → technicians ignore it. Tune the threshold with them.","Low regulatory risk; check machinery safety rules if it controls equipment.","One production line, 3 months, compare against normal maintenance."],
+ l:"Not every AI feature needs an LLM. Choose the technique by the data type."},
+{d:"Insurance",c:"#13A3A3",f:"Extract data from claim documents",t:["Minimal to high, depends on use","#F2A60C"],
+ s:["Claims handlers retype data from PDFs and photos.","Documents vary in layout: extraction with vision-language models fits.","Claim forms, invoices, photos; personal and sometimes health data.","Document AI extracts fields with confidence scores into the claims system.","Eval: field-level accuracy on 500 documents. KPI: processing time.","Low-confidence fields are highlighted for manual check.","Pricing or life/health risk assessment is high risk; extraction alone is lower. DPIA.","Start with one claim type, keep handler approval."],
+ l:"Confidence scores per field let you automate the easy 80% and route the rest to people."},
+{d:"Logistics",c:"#6C3CE0",f:"Predict delivery delays and notify customers",t:["Minimal risk","#1FA971"],
+ s:["'Where is my order?' is the top contact reason.","Delay depends on weather, traffic, hub load: prediction fits.","Shipment scans, routes, weather, historical delays.","Classic ML for prediction + LLM for message wording.","Eval: prediction accuracy within ±1 day. KPI: WISMO contacts. Guardrail: false delay alerts.","Only notify above a confidence threshold.","Low risk; GDPR for location data.","Pilot in one region with a control group."],
+ l:"Combine techniques: ML predicts, the LLM communicates."},
+{d:"Education",c:"#E2445C",f:"AI tutor for practice questions",t:["High risk if it grades or admits","#FF7A3D"],
+ s:["Learners get no feedback between classes.","Open-ended explanations need generation.","Course material, question bank, past student mistakes.","RAG over course content; tutor gives hints, not answers.","Eval: teacher review of 200 interactions. KPI: practice completion, test score lift.","Wrong explanations harm learning: teacher-flag button, source links.","AI Act: grading or admission is high risk; extra care for minors. Hint-only tutoring is lower.","One course, one term, with opt-in."],
+ l:"Who the user is (minors, learners) changes the risk as much as what the AI does."},
+{d:"Public sector",c:"#29A86B",f:"Help citizens find the right form",t:["Limited risk","#2E86DE"],
+ s:["Citizens fill wrong forms, causing rework.","People describe life events, not form names: semantic search fits.","Public forms, guidance pages; multilingual needs.","RAG assistant in plain and multiple languages, links to official forms.","Eval: 200 real questions; accessibility check. KPI: correct form first time.","Never give legal decisions; always link to the official source.","Transparency duties; accessibility law; benefit eligibility decisions would be high risk.","Beta on one service with clear 'test' label."],
+ l:"Trust and accessibility are part of the requirements, not polish."}];
+$("domains").innerHTML=CASES.map((c,i)=>`<button type="button" data-c="${i}" style="--pc:${c.c}">${c.d}</button>`).join("");
+function showCase(i){const c=CASES[i];document.querySelectorAll("#domains button").forEach(b=>b.classList.toggle("on",+b.dataset.c===i));
+ $("case").innerHTML=`<div class="case" style="--pc:${c.c}"><div class="case-head"><h3>${c.d}: ${esc(c.f)}</h3><span class="tierpill" style="background:${c.t[1]}">AI Act: ${c.t[0]}</span></div>
+ <div class="cgrid">${c.s.map((x,k)=>`<div class="cbox" style="--pc:${STEPS[k][4]}"><div class="lab">${k+1} · ${STEPS[k][0]}</div>${esc(x)}</div>`).join("")}</div>
+ <div class="think"><b>Lesson from this domain:</b> ${esc(c.l)}</div></div>`}
+$("domains").addEventListener("click",e=>{const b=e.target.closest("button");if(b)showCase(+b.dataset.c)});showCase(0);
+let cvs={};try{cvs=JSON.parse(localStorage.getItem(KEY+"-canvas")||"{}")}catch(e){}
+$("canvas").innerHTML=STEPS.map((x,i)=>`<label for="cn${i}" style="border-top:5px solid ${x[4]}">${i+1}. ${x[0]}<small>${x[1]}</small><textarea id="cn${i}" data-i="${i}"></textarea></label>`).join("");
+function cmeter(){const n=STEPS.filter((_,i)=>(cvs[i]||"").trim().length>15).length;$("cbar").style.width=n/8*100+"%";$("ctext").textContent=`${n} of 8 steps filled`;return n}
+function cfill(){STEPS.forEach((_,i)=>$("cn"+i).value=cvs[i]||"");cmeter()}
+const csave=()=>{try{localStorage.setItem(KEY+"-canvas",JSON.stringify(cvs))}catch(e){}};
+$("canvas").addEventListener("input",e=>{const i=e.target.dataset.i;if(i==null)return;const before=cmeter();cvs[i]=e.target.value;csave();if(cmeter()===8&&before<8){confetti();toast("Canvas complete. You have a PRD outline!")}});
+$("cload").addEventListener("click",()=>{CASES[1].s.forEach((x,i)=>cvs[i]=x);csave();cfill()});
+$("cclear").addEventListener("click",()=>{cvs={};csave();cfill()});cfill();
+
+
+// ---------- learn by doing ----------
+const SORT=[["Reject orders over €10,000 without approval",0,"A clear threshold: a rule is cheaper, testable and explainable."],["Predict which customers will cancel next month",1,"Structured historical data and a numeric prediction: classic ML."],["Summarise 40-page supplier contracts",2,"Long unstructured text and generation: an LLM."],["Detect fraud in card transactions",1,"Many numeric signals, fast decisions, explainability needs: classic ML."],["Route emails to the right team from free text",2,"Messy language with many variants: an LLM (or a small text classifier)."],["Calculate VAT on an invoice",0,"Exact, legally defined maths: never use AI for this."],["Forecast warehouse demand per week",1,"Time series of numbers: classic ML forecasting."],["Answer employee HR policy questions",2,"Questions over documents: an LLM with RAG."],["Flag invoices missing a PO number",0,"A simple presence check: a rule."],["Draft first versions of job ads",2,"Text generation: an LLM, with human review."]];
+let si=0,sc=0;function sortShow(){if(si>=SORT.length){$("s1item").textContent=`Done: ${sc}/${SORT.length}`;$("s1bins").hidden=true;$("s1score").textContent="";if(sc>=8){confetti();toast("Great instincts!")}
+ $("s1fb").innerHTML=`<button class="reset" type="button" id="s1again">Play again</button>`;$("s1again").onclick=()=>{si=0;sc=0;$("s1bins").hidden=false;$("s1fb").textContent="";sortShow()};return}
+ const el=$("s1item");el.textContent=SORT[si][0];el.style.animation="none";el.offsetHeight;el.style.animation="";$("s1score").textContent=`${si+1}/${SORT.length} · score ${sc}`}
+$("s1bins").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||si>=SORT.length)return;const ok=+b.dataset.b===SORT[si][1];if(ok)sc++;
+ b.classList.add(ok?"flash-good":"flash-bad");setTimeout(()=>b.classList.remove("flash-good","flash-bad"),500);
+ $("s1fb").innerHTML=`<b style="color:var(${ok?"--good":"--bad"})">${ok?"Correct.":"Better: "+["Rules","Classic ML","LLM"][SORT[si][1]]+"."}</b> ${esc(SORT[si][2])}`;si++;setTimeout(sortShow,ok?700:1400)});sortShow();
+function tok(){const t=$("tkin").value;const parts=t.match(/\s?[A-Za-zÄÖÜäöüß]{1,4}|\s?\d{1,3}|\s?[^\sA-Za-z\d]|\s+/g)||[];
+ const merged=[];parts.forEach(p=>{const last=merged[merged.length-1];if(last&&/^[A-Za-zÄÖÜäöüß]+$/.test(p)&&/[A-Za-z]$/.test(last)&&last.length+p.length<=6&&!/^\s/.test(p))merged[merged.length-1]+=p;else merged.push(p)});
+ $("tkout").innerHTML=merged.map((p,i)=>`<span style="background:color-mix(in srgb,${PCOL[i%7]} 28%,var(--surface));animation-delay:${Math.min(i,40)*15}ms">${esc(p).replace(/ /g,"·")}</span>`).join("");
+ $("tkscore").textContent=`${t.length} chars ≈ ${merged.length} tokens · ${(merged.length/Math.max(1,t.split(/\s+/).filter(Boolean).length)).toFixed(1)} per word`}
+$("tkin").addEventListener("input",tok);tok();
+const PB=[["role","Role","You are an experienced project manager."],["ctx","Context","Context: notes from the weekly steering meeting of an ERP rollout."],["task","Clear task","Task: extract every risk, issue and dependency."],["fmt","Output format","Format: table with columns Type | Description | Owner | Due date."],["ex","Example","Example row: Risk | Data migration may slip | Anna | 15 Nov"],["rules","Constraints","If an owner is not named, write 'Unassigned'. Do not invent dates."]];
+const PBO=["Here is a summary of the meeting. The team discussed several topics including the timeline and data. There were some concerns raised. Overall the project is progressing.","- Data migration might be late\n- Testing environment not ready\n- Need sign-off from finance","Risk: data migration may slip (Anna, 15 Nov)\nIssue: test environment not ready (Tom)\nDependency: finance sign-off","Type | Description | Owner | Due\nRisk | Data migration may slip | Anna | 15 Nov\nIssue | Test env not ready | Tom | 01 Nov\nDependency | Finance sign-off | Unassigned | (none)"];
+$("pbt").innerHTML=PB.map(p=>`<label><input type="checkbox" id="pb-${p[0]}" data-p="${p[0]}">${p[1]}</label>`).join("");
+let typer;function pb(){const on=PB.filter(p=>$("pb-"+p[0]).checked);const lvl=on.length<=1?0:on.length<=3?1:on.length<=5?2:3;
+ $("pbp").textContent=(on.length?on.map(p=>p[2]).join("\n"):"Summarise these notes.")+"\n\n[meeting notes…]";
+ $("pbm").style.width=[15,45,75,100][lvl]+"%";$("pbm").style.background=["#E2445C","#F2A60C","#2E86DE","#1FA971"][lvl];
+ $("pbscore").textContent=["Vague","Better","Good","Production-ready"][lvl];
+ clearInterval(typer);const txt=PBO[lvl];let k=0;$("pbo").textContent="";typer=setInterval(()=>{k+=3;$("pbo").textContent=txt.slice(0,k);if(k>=txt.length){clearInterval(typer);if(lvl===3)toast("That's a production-grade prompt!")}},18)}
+$("pbt").addEventListener("change",pb);pb();
+const CH=["Travel: employees may book economy class for flights under 6 hours.","Remote work: up to 3 days per week from home, agreed with the manager.","Expenses: receipts must be submitted within 30 days.","Holidays: 30 days of paid leave per year for full-time staff.","Training budget: €1,500 per employee per year, approved by the manager.","IT security: laptops must use full-disk encryption."];
+const RQ=[["How many home-office days can I take?",1,"You can work from home up to 3 days per week, agreed with your manager. [Source: Remote work policy]"],["Can I fly business to Lisbon?",0,"Flights under 6 hours are economy class, so Lisbon would be economy. [Source: Travel policy]"],["How much can I spend on courses?",4,"You have €1,500 per year for training, approved by your manager. [Source: Training budget]"]];
+$("ragq").innerHTML=RQ.map((q,i)=>`<label><input type="radio" name="rq" data-q="${i}">${q[0]}</label>`).join("");
+$("chunks").innerHTML=CH.map(c=>`<div>${c}</div>`).join("");
+let ragT=[];$("ragq").addEventListener("change",e=>{const q=RQ[+e.target.dataset.q];ragT.forEach(clearTimeout);ragT=[];const P=[...$("pipe").children],C=[...$("chunks").children];
+ P.forEach(x=>x.classList.remove("on"));C.forEach(x=>x.classList.remove("hit","dim"));$("ragout").textContent="…";
+ const st=(i,f)=>ragT.push(setTimeout(()=>{P.forEach(x=>x.classList.remove("on"));P[i].classList.add("on");f&&f()},i*800));
+ st(0,()=>$("ragout").textContent="Receiving question…");st(1,()=>$("ragout").textContent="Converting question to an embedding vector: [0.12, -0.48, 0.91, …]");
+ st(2,()=>{C.forEach((x,k)=>x.classList.add(k===q[1]?"hit":"dim"));$("ragout").textContent="Found the most similar passage."});
+ st(3,()=>$("ragout").textContent=q[2].split(" [")[0]);st(4,()=>$("ragout").textContent=q[2])});
+const SIM=[["Week 3 of a PoC. The model scores 71% on the eval set; the target agreed upfront was 80%. The sponsor loves the demo.",[["Launch anyway, the sponsor is happy",0,"A demo is not evidence. You would ship below the agreed quality bar."],["Report honestly, analyse errors, propose one more time-boxed iteration or stop",2,"Kill criteria exist for this moment. Error analysis shows if 80% is reachable."],["Quietly lower the target to 70%",0,"Moving goalposts destroys trust in the whole AI programme."]]],
+["Legal asks if your new CV-screening tool falls under the EU AI Act.",[["No, we only use an off-the-shelf model",0,"The Act classifies by use. Employment use is high risk even with a bought model."],["Yes, likely high risk as deployer: plan oversight, logging, worker information",2,"Correct. Plan these duties as a workstream, and involve the works council in Germany."],["Only if we train our own model",0,"Deployers of high-risk systems have their own obligations."]]],
+["After launch, user complaints about wrong answers rise slowly over 2 months.",[["Probably drift: compare recent inputs with the eval set, add new failures to evals, re-test",2,"Classic drift pattern. Monitoring plus growing the eval set is the fix."],["Switch to the newest, biggest model",1,"Might help, but without diagnosis you may pay more and still fail."],["Ignore, complaints are normal",0,"Rising trends are an early warning. Act before trust is lost."]]],
+["Monthly LLM costs are 4× the business case.",[["Turn the feature off",0,"Too drastic before checking cheaper options."],["Analyse token usage, add caching, route simple requests to a smaller model, re-check evals",2,"Standard cost levers. Re-running evals ensures quality holds."],["Ask finance for more budget",1,"Sometimes needed, but first use the cost levers you control."]]],
+["An engineer proposes a fully autonomous agent that emails suppliers and changes orders.",[["Approve: agents are the future",0,"Irreversible actions with compounding errors need controls."],["Start with drafts and human approval for every send; measure reliability first",2,"Earn autonomy with data. Human approval on irreversible actions."],["Reject agents completely",1,"Too cautious: a supervised agent could still add value."]]]];
+let simI=0,simS=0,simR=[];function simRender(){$("simbadges").innerHTML=SIM.map((_,i)=>`<span class="${simR[i]===2?"g":simR[i]===1?"m":simR[i]===0?"b":""}">${i+1}</span>`).join("");$("simscore").textContent=`Score ${simS}/${SIM.length*2}`;
+ if(simI>=SIM.length){$("sim").innerHTML=`<div class="sim"><h3>${simS>=8?"Ready to lead AI projects.":simS>=5?"Good instincts, review phases 4–6.":"Keep going: revisit phases 4–6."}</h3><button class="reset" type="button" id="simre">Try again</button></div>`;$("simre").onclick=()=>{simI=0;simS=0;simR=[];simRender()};if(simS>=8)confetti(200);return}
+ const q=SIM[simI];$("sim").innerHTML=`<div class="sim"><p><b>Situation ${simI+1}.</b> ${esc(q[0])}</p><div class="opts">${q[1].map((o,j)=>`<button type="button" data-j="${j}">${esc(o[0])}</button>`).join("")}</div><p class="why" id="simwhy"></p></div>`}
+$("sim").addEventListener("click",e=>{const b=e.target.closest("button[data-j]");if(!b)return;const o=SIM[simI][1][+b.dataset.j];simR[simI]=o[1];simS+=o[1];
+ document.querySelectorAll("#sim .opts button").forEach(x=>{x.disabled=true;const v=SIM[simI][1][+x.dataset.j][1];if(v===2)x.classList.add("right")});if(o[1]<2)b.classList.add("wrong");
+ $("simwhy").innerHTML=`${esc(o[2])} <button class="reset" type="button" id="simnext">Next →</button>`;$("simnext").onclick=()=>{simI++;simRender()};
+ $("simbadges").innerHTML=SIM.map((_,i)=>`<span class="${simR[i]===2?"g":simR[i]===1?"m":simR[i]===0?"b":""}">${i+1}</span>`).join("");$("simscore").textContent=`Score ${simS}/${SIM.length*2}`});simRender();
+
+
+// ---------- animated scenes ----------
+const SC={};
+function sceneA(svg,t){const words=["The","project","is","on","track","because","the","data","is","ready","."],n=Math.min(words.length,Math.floor(t/1.6));
+ const cands=[["track","risk","hold"],["because","but","since"]];let h=`<text x="16" y="34" font-size="12" style="fill:var(--muted)">Prompt: "Give a status update"</text>`;
+ let x=16;words.slice(0,n).forEach((w,i)=>{const wd=w.length*7+10;if(x+wd>304){x=16}const y=x===16&&i>5?96:66;h+=`<rect x="${x}" y="${y-14}" width="${wd}" height="20" rx="5" fill="${PCOL[i%7]}" opacity=".85"/><text x="${x+5}" y="${y}" font-size="12" style="fill:#fff">${w}</text>`;x+=wd+4});
+ const ci=n===4?0:n===5?1:-1;if(ci>=0){const pr=[[.71,.2,.09],[.62,.28,.1]][ci];cands[ci].forEach((c,k)=>{const y=126+k*22;h+=`<text x="16" y="${y+12}" font-size="11">${c}</text><rect x="80" y="${y}" width="${pr[k]*200*Math.min(1,(t%1.6)/0.8)}" height="14" rx="4" fill="${k?"#9C95B0":"#6C3CE0"}"/><text x="${86+pr[k]*200}" y="${y+12}" font-size="10" style="fill:var(--muted)">${Math.round(pr[k]*100)}%</text>`})}
+ svg.innerHTML=h;return t<20?(n<4?"The model reads the prompt, then predicts the most likely next token.":n<5?"For each step it scores every possible token. Here 'track' wins with 71%.":n<6?"Next step: 'because' wins with 62%. The model picks a likely token again.":"Token by token, the answer appears. No database lookup: just probabilities."):null}
+function sceneB(svg,t){const st=[["Discover","#FF7A3D"],["Data","#1FA971"],["PoC","#2E86DE"],["Pilot","#8E5CE0"],["Launch","#E0457B"],["Operate","#13A3A3"]];const k=Math.min(5,Math.floor(t/3.2));
+ let h=`<path d="M20 150 Q160 40 300 150" fill="none" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>`;
+ st.forEach((x,i)=>{const u=i/5,px=20+280*u,py=150-4*110*u*(1-u);h+=`<circle cx="${px}" cy="${py}" r="${i<=k?11:7}" fill="${i<=k?x[1]:"var(--line)"}"/><text x="${px}" y="${py+28}" font-size="10" text-anchor="middle">${x[0]}</text>`});
+ const u=Math.min(1,t/16),bx=20+280*u,by=150-4*110*u*(1-u);h+=`<text x="${bx}" y="${by-16}" font-size="20" text-anchor="middle">🚀</text>`;
+ const gate=k===2&&t%3.2>1.6;if(gate)h+=`<rect x="110" y="16" width="100" height="24" rx="12" fill="#F2A60C"/><text x="160" y="32" font-size="11" text-anchor="middle" style="fill:#fff">Go / no-go gate</text>`;
+ svg.innerHTML=h;return t<20?["Discover: a real, measurable problem worth solving.","Data: check you have it, may use it, and it's good enough.","PoC: a time-boxed experiment with evals and kill criteria.","Pilot: real users, guardrails, human review.","Launch: staged rollout with monitoring.","Operate: watch drift and cost, re-evaluate. It never ends."][k]:null}
+function sceneC(svg,t){const n=Math.min(40,Math.floor(t*2));let pts=[];for(let i=0;i<=n;i++){const q=i<14?90-Math.sin(i)*2:90-(i-14)*1.6-Math.sin(i)*2;pts.push([30+i*6.6,190-(q-40)*3])}
+ let h=`<line x1="30" y1="${190-40*3}" x2="300" y2="${190-40*3}" stroke="#E2445C" stroke-dasharray="4 4"/><text x="300" y="${190-40*3-6}" font-size="10" text-anchor="end" style="fill:#E2445C">alert threshold 80%</text><text x="30" y="20" font-size="11" style="fill:var(--muted)">Model accuracy over weeks</text>`;
+ h+=`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#1FA971" stroke-width="3" stroke-linejoin="round"/>`;const last=pts[pts.length-1];const q=(190-last[1])/3+40;
+ h+=`<circle cx="${last[0]}" cy="${last[1]}" r="6" fill="${q<80?"#E2445C":"#1FA971"}"/>`;if(q<80)h+=`<rect x="190" y="150" width="110" height="26" rx="13" fill="#E2445C"/><text x="245" y="167" font-size="11" text-anchor="middle" style="fill:#fff">⚠ Re-evaluate!</text>`;
+ if(n>=14&&n<17)h+=`<text x="${30+14*6.6}" y="70" font-size="10" text-anchor="middle">new product line launched</text>`;
+ svg.innerHTML=h;return t<20?(n<14?"After launch, quality looks stable.":q>=80?"The world changes: new products, new customer language. Quality slips.":"Monitoring catches it. Add new cases to evals, fix, and re-test."):null}
+const SFN={A:sceneA,B:sceneB,C:sceneC};
+function playScene(id){const btn=document.querySelector(`[data-sc="${id}"]`);if(SC[id]){cancelAnimationFrame(SC[id]);SC[id]=0;btn.textContent="▶";return}
+ const t0=performance.now();btn.textContent="❚❚";const loop=now=>{const t=Math.max(0,(now-t0)/1000);const c=SFN[id]($("sc"+id),t);$("pg"+id).style.width=Math.min(100,t/20*100)+"%";if(c){$("cp"+id).textContent=c;SC[id]=requestAnimationFrame(loop)}else{SC[id]=0;btn.textContent="↻"}};SC[id]=requestAnimationFrame(loop)}
+document.querySelectorAll("[data-sc]").forEach(b=>b.addEventListener("click",()=>playScene(b.dataset.sc)));
+["A","B","C"].forEach(id=>SFN[id]($("sc"+id),id==="C"?20:8));
+
+// ---------- HF image studio ----------
+const HFP=[["Phase hero","Colorful flat illustration of a project manager guiding a friendly robot along a road map with milestones, bright joyful colors, clean vector style"],["RAG","Isometric illustration of a library where glowing documents fly into an AI brain that answers questions, vivid colors, clean vector style"],["Team","Diverse team around a table planning an AI project with sticky notes and charts, cheerful flat illustration, bright palette"],["Governance","Friendly illustration of a shield and scales of justice protecting a glowing AI chip, EU stars, flat vector, joyful colors"],["Drift","Playful infographic illustration of a line chart slowly dropping with a magnifying glass and alarm bell, flat colorful style"]];
+$("hfpre").innerHTML=HFP.map((x,i)=>`<button type="button" data-h="${i}">${x[0]}</button>`).join("");
+$("hfpre").addEventListener("click",e=>{const b=e.target.closest("button");if(b)$("hfprompt").value=HFP[+b.dataset.h][1]});
+try{const t=localStorage.getItem("hf-token")||sessionStorage.getItem("hf-token");if(t){$("hftok").value=t;$("hfremember").checked=!!localStorage.getItem("hf-token")}}catch(e){}
+function keepTok(){const t=$("hftok").value.trim();try{sessionStorage.setItem("hf-token",t);if($("hfremember").checked)localStorage.setItem("hf-token",t);else localStorage.removeItem("hf-token")}catch(e){}}
+$("hftok").addEventListener("change",keepTok);$("hfremember").addEventListener("change",keepTok);
+$("hfgo").addEventListener("click",async()=>{const tok=$("hftok").value.trim(),model=$("hfmodel").value,prompt=$("hfprompt").value.trim();$("hferr").textContent="";
+ if(!/^hf_/.test(tok)){$("hferr").textContent="Paste a Hugging Face token that starts with hf_.";return}if(!prompt){$("hferr").textContent="Write a prompt first.";return}
+ keepTok();$("hfgo").disabled=true;$("hfgo").textContent="Generating…";$("hfout").innerHTML='<div class="spinner"></div>';
+ const urls=[`https://router.huggingface.co/hf-inference/models/${model}`,`https://api-inference.huggingface.co/models/${model}`];let msg="";
+ for(const u of urls){try{const r=await fetch(u,{method:"POST",headers:{"Authorization":"Bearer "+tok,"Content-Type":"application/json","Accept":"image/png"},body:JSON.stringify({inputs:prompt})});
+   if(r.ok&&(r.headers.get("content-type")||"").startsWith("image")){const url=URL.createObjectURL(await r.blob());$("hfout").innerHTML=`<img src="${url}" alt="${esc(prompt)}">`;
+    $("hfgal").insertAdjacentHTML("afterbegin",`<figure><img src="${url}" alt="${esc(prompt)}"><figcaption>${esc(prompt.slice(0,70))}</figcaption></figure>`);toast("Image ready!");msg="";break}
+   const body=await r.text();msg=r.status===401?"Token rejected. Check it is correct and has Inference permission.":r.status===402?"Out of free credits for this month. Try next month or add credits on Hugging Face.":r.status===503?"Model is loading on Hugging Face. Try again in about 30 seconds.":r.status===404?"This model is not available on the free API right now. Pick another model.":`Hugging Face returned ${r.status}: ${body.slice(0,160)}`;if(r.status===401||r.status===402)break}
+  catch(e){msg="Could not reach Hugging Face. The online version of this site blocks outside connections: download the HTML file (or open it from your computer) to use the image studio."}}
+ if(msg){$("hferr").textContent=msg;$("hfout").textContent="No image yet."}$("hfgo").disabled=false;$("hfgo").textContent="Generate image"});
+
+// phase rings
+function rings(){PHASES.forEach(p=>{let t=0,d=0;p.mods.forEach(m=>m.topics.forEach((_,i)=>{t++;if(done[m.id+"-"+i])d++}));const f=t?d/t:0;
+ const c=document.querySelector(`[data-ring="${p.n}"]`);if(c)c.setAttribute("stroke-dashoffset",163.4*(1-f));const tx=document.querySelector(`[data-rt="${p.n}"]`);if(tx)tx.textContent=Math.round(f*100)+"%"})}
+const _u=update;update=function(){_u();rings()};update();
+// hero stops
+(function(){const r=document.getElementById("road"),g=document.getElementById("stops");if(!r.getTotalLength)return;const L=r.getTotalLength();let h="";
+ for(let i=1;i<=7;i++){const pt=r.getPointAtLength(L*i/8);h+=`<circle class="stop" cx="${pt.x}" cy="${pt.y}" r="6" style="animation-delay:${.3+i*.3}s"/><text x="${pt.x}" y="${pt.y-12}" text-anchor="middle">${i}</text>`}g.innerHTML=h})();
+// radar
+(function(){const sv=document.getElementById("radar"),C=["AI literacy","Data judgement","Experiment delivery","Evals & metrics","Governance & risk","Strategy & economics"],B=[1.5,2,2.5,1.5,2,3],A=[4.5,4,4.5,4,4.5,4.5],cx=210,cy=190,R=130;
+ const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/6;return[cx+Math.cos(a)*R*v/5,cy+Math.sin(a)*R*v/5]};let h="";
+ for(let l=1;l<=5;l++)h+=`<polygon class="ax" points="${C.map((_,i)=>pt(i,l).join(",")).join(" ")}"/>`;
+ C.forEach((c,i)=>{const[x,y]=pt(i,5),[lx,ly]=pt(i,5.9);h+=`<line class="ax" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/><text class="lbl" x="${lx}" y="${ly}" text-anchor="${Math.abs(lx-cx)<5?"middle":lx>cx?"start":"end"}" dominant-baseline="middle">${c}</text>`});
+ h+=`<polygon class="before" points="${B.map((v,i)=>pt(i,v).join(",")).join(" ")}"/><polygon class="after" points="${A.map((v,i)=>pt(i,v).join(",")).join(" ")}"/>`;sv.innerHTML=h})();
+
+
+// ================= v10: gamification, mission, palette, flashcards, theme =================
+const LEVELS=[[0,"AI Curious"],[100,"AI Explorer"],[300,"AI Practitioner"],[600,"AI Project Lead"],[1000,"PM Evolved"],[1500,"Head of AI"]];
+const BADGES=[["🚀","First step: complete any topic",x=>x.topics>=1],["📘","Module master: finish a whole module",x=>x.mods>=1],["🧠","Quiz whiz: 10 correct quiz answers",x=>x.quiz>=10],["🧩","Designer: complete the feature canvas",x=>x.canvas>=8],["🃏","Word wise: know 8 flashcards",x=>x.cards>=8],["🏆","Phase champion: finish a whole phase",x=>x.phases>=1]];
+let known={};try{known=JSON.parse(localStorage.getItem(KEY+"-cards")||"{}")}catch(e){}
+let lastLvl=-1;
+function stats(){let topics=0,mods=0,phases=0;PHASES.forEach(p=>{let pa=true;p.mods.forEach(m=>{let all=true;m.topics.forEach((_,i)=>{if(done[m.id+"-"+i])topics++;else all=false});if(all)mods++;else pa=false});if(pa)phases++});
+ let quiz=0;Object.keys(QUIZ).forEach(n=>QUIZ[n].forEach((q,i)=>{if(qs[n+"-"+i]===q[2])quiz++}));
+ const canvas=STEPS.filter((_,i)=>(cvs[i]||"").trim().length>15).length,cards=Object.keys(known).length;
+ return{topics,mods,phases,quiz,canvas,cards,xp:topics*10+mods*30+quiz*20+canvas*15+cards*5+phases*100}}
+function hud(){const st=stats();let li=0;LEVELS.forEach((l,i)=>{if(st.xp>=l[0])li=i});const cur0=LEVELS[li][0],nxt=LEVELS[li+1];
+ $("xp").textContent=st.xp+" XP";$("lvnum").textContent=li+1;$("lvname").textContent=LEVELS[li][1];
+ $("lvnext").textContent=nxt?`${st.xp-cur0} / ${nxt[0]-cur0} XP to ${nxt[1]}`:"Top level reached";
+ $("lvring").setAttribute("stroke-dashoffset",113.1*(1-(nxt?(st.xp-cur0)/(nxt[0]-cur0):1)));
+ $("badges").innerHTML=BADGES.map(b=>`<span class="${b[2](st)?"got":""}" title="${b[1]}" aria-label="${b[1]}${b[2](st)?" (earned)":""}">${b[0]}</span>`).join("");
+ if(lastLvl>=0&&li>lastLvl){confetti(220);toast(`Level up! You are now ${LEVELS[li][1]}`)}lastLvl=li;mission()}
+["change","input","click"].forEach(ev=>document.addEventListener(ev,()=>setTimeout(hud,60)));
+
+// mission
+const mWrap=document.createElement("div");$("v-curriculum").prepend(mWrap);
+function mission(){let nx=null;for(const p of PHASES){for(const m of p.mods){const i=m.topics.findIndex((_,k)=>!done[m.id+"-"+k]);if(i>=0){nx={p,m,i};break}}if(nx)break}
+ if(!nx){mWrap.innerHTML=`<div class="mission"><div><span class="eyebrow">All done</span><h2>You finished the whole track.</h2><p>Publish your capstone and start applying.</p></div></div>`;return}
+ const v=nx.m.vids[0],ex={1:"Rules, classic ML, or LLM?",2:"Build a better prompt",3:"Feature design canvas",4:"Precision vs recall",5:"AI PM simulator",6:"EU AI Act risk tier",7:"AI PM simulator"}[nx.p.n];
+ const tab={1:"doing",2:"doing",3:"studio",4:"playground",5:"doing",6:"playground",7:"doing"}[nx.p.n];
+ mWrap.innerHTML=`<div class="mission"><div><span class="eyebrow">Today's mission · Phase ${nx.p.n} · module ${nx.m.id}</span><h2>${esc(nx.m.t)}</h2><p>Next topic: <b>${esc(nx.m.topics[nx.i])}</b>. About 30 minutes: watch, try, tick.</p></div>
+ <div class="mlist"><button type="button" data-go="${nx.m.id}"><i>1</i>Open the module</button>${v?`<a href="${v[1]}" target="_blank" rel="noopener"><i>▶</i>${esc(v[0].slice(0,48))}</a>`:""}<button type="button" data-tab="${tab}"><i>3</i>Try: ${ex}</button></div></div>`}
+function openMod(id){show("curriculum");const d=document.getElementById("m-"+id);if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:RM?"auto":"smooth",block:"start"}),50)}}
+mWrap.addEventListener("click",e=>{const g=e.target.closest("[data-go]"),t=e.target.closest("[data-tab]");if(g)openMod(g.dataset.go);if(t){show(t.dataset.tab);$("hud").scrollIntoView({behavior:"smooth"})}});
+
+// flashcards
+let order=GLOSS.map((_,i)=>i);
+function cards(){$("gloss").innerHTML=order.map((i,k)=>`<button type="button" class="fc ${known[i]?"known":""}" data-fc="${i}" style="--pc:${PCOL[k%7]}"><div class="in"><div class="f"><div>${esc(GLOSS[i][0])}<small>tap to flip</small></div></div><div class="b">${esc(GLOSS[i][1])}</div></div></button>`).join("");$("fcstat").textContent=`${Object.keys(known).length} of ${GLOSS.length} known`}
+$("gloss").addEventListener("click",e=>{const c=e.target.closest(".fc");if(c)c.classList.toggle("flip")});
+function markKnown(c){const i=c.dataset.fc;if(known[i])delete known[i];else known[i]=1;try{localStorage.setItem(KEY+"-cards",JSON.stringify(known))}catch(x){}c.classList.toggle("known",!!known[i]);$("fcstat").textContent=`${Object.keys(known).length} of ${GLOSS.length} known`;hud()}
+$("gloss").addEventListener("dblclick",e=>{const c=e.target.closest(".fc");if(c)markKnown(c)});
+$("gloss").addEventListener("keydown",e=>{const c=e.target.closest(".fc");if(c&&e.key.toLowerCase()==="k")markKnown(c)});
+$("fcshuffle").onclick=()=>{order.sort(()=>Math.random()-.5);cards()};$("fcflip").onclick=()=>document.querySelectorAll(".fc").forEach(c=>c.classList.toggle("flip"));cards();
+
+// command palette
+const IDX=[];PHASES.forEach(p=>p.mods.forEach(m=>{IDX.push({t:`${m.id} ${m.t}`,k:"Module",c:PCOL[p.n-1],ic:m.id,go:()=>openMod(m.id),s:(m.t+" "+m.topics.join(" ")).toLowerCase()});m.vids.forEach(v=>IDX.push({t:v[0],k:"Video",c:"#E2445C",ic:"▶",url:v[1],s:v[0].toLowerCase()+" "+m.t.toLowerCase()}))}));
+GLOSS.forEach(g=>IDX.push({t:g[0]+" — "+g[1],k:"Term",c:"#13A3A3",ic:"Aa",go:()=>show("glossary"),s:(g[0]+" "+g[1]).toLowerCase()}));
+[["Learn by doing","doing"],["AI image studio","imgstudio"],["Feature design studio","studio"],["Playground","playground"],["Role & skills map","skills"],["Free library","library"],["Career & certification","career"]].forEach(x=>IDX.push({t:x[0],k:"Section",c:"#6C3CE0",ic:"§",go:()=>show(x[1]),s:x[0].toLowerCase()}));
+CASES.forEach(c=>IDX.push({t:`${c.d}: ${c.f}`,k:"Case",c:c.c,ic:"◆",go:()=>{show("studio");showCase(CASES.indexOf(c))},s:(c.d+" "+c.f).toLowerCase()}));
+let palAct=0,palHits=[];
+function palRender(){const q=$("palin").value.trim().toLowerCase();palHits=(q?IDX.filter(x=>q.split(/\s+/).every(w=>x.s.includes(w)||x.t.toLowerCase().includes(w))):IDX.filter(x=>x.k==="Section"||x.k==="Module").slice(0,12)).slice(0,30);palAct=0;
+ $("palres").innerHTML=palHits.length?palHits.map((x,i)=>`<button type="button" data-pi="${i}" class="${i===0?"act":""}"><span class="ic" style="background:${x.c}">${x.ic}</span><span>${esc(x.t.slice(0,90))}</span><small>${x.k}</small></button>`).join(""):`<p class="note" style="padding:12px">No matches. Try "RAG", "drift" or "AI Act".</p>`}
+function palOpen(){$("pal").hidden=false;$("palin").value="";palRender();setTimeout(()=>$("palin").focus(),10)}
+function palClose(){$("pal").hidden=true}
+function palGo(i){const x=palHits[i];if(!x)return;palClose();if(x.url)window.open(x.url,"_blank","noopener")||(location.href=x.url);else x.go()}
+$("searchbtn").onclick=palOpen;$("palin").addEventListener("input",palRender);
+$("pal").addEventListener("click",e=>{if(e.target.id==="pal")palClose();const b=e.target.closest("[data-pi]");if(b)palGo(+b.dataset.pi)});
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("pal").hidden?palOpen():palClose();return}
+ if($("pal").hidden){if(e.key==="/"&&!/input|textarea/i.test(document.activeElement.tagName)){e.preventDefault();palOpen()}return}
+ if(e.key==="Escape")palClose();if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();palAct=(palAct+(e.key==="ArrowDown"?1:-1)+palHits.length)%palHits.length;document.querySelectorAll("#palres button").forEach((b,i)=>b.classList.toggle("act",i===palAct));document.querySelector("#palres .act")?.scrollIntoView({block:"nearest"})}
+ if(e.key==="Enter")palGo(palAct)});
+
+// theme
+function setTheme(t){if(t)document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme");try{localStorage.setItem(KEY+"-theme",t||"")}catch(e){}}
+try{const t=localStorage.getItem(KEY+"-theme");if(t)setTheme(t)}catch(e){}
+$("themebtn").onclick=()=>{const cur1=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");setTheme(cur1==="dark"?"light":"dark")};
+
+// tabs
+const tabs=document.querySelectorAll("#tabs button");
+function show(v){tabs.forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));["curriculum","doing","imgstudio","studio","playground","skills","library","glossary","career"].forEach(x=>document.getElementById("v-"+x).hidden=x!==v)}
+tabs.forEach(b=>b.addEventListener("click",()=>show(b.dataset.v)));
+tl.addEventListener("click",e=>{if(e.target.closest("a"))show("curriculum")});
+const first=document.querySelector("details.mod");if(first)first.open=true;
+hud();
+</script>
+
+</body>
+</html>
